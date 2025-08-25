@@ -12,7 +12,7 @@ print_usage ()
 make_symlinks ()
 {
     if [[ 2 -le $# ]]; then
-        local destination source files
+        local destination source files f
         destination="${@[-1]}"
         for source in "${@[1,-2]}"; do
             # List the files in each source directory, including
