@@ -6,29 +6,29 @@ progname=`basename ${0}`
 print_usage ()
 {
     echo "Usage: ${progname} of-symlinks dir1 dir2 ... dirN environ-dir"
-    echo "       ${progname} blahblah xxxxxxxxxxxxxxx"
+    echo "  ${progname} blahblah xxxxxxxxxxxxxxx"
 }
 
 make_symlinks ()
 {
     if [[ 2 -le $# ]]; then
-	local destination source files
-	destination="${@[-1]}"
-	for source in "${@[1,-2]}"; do
-	    # List the files in each source directory, including
-	    # hidden files.
-	    files=`ls --almost-all "${source}"/.`
+        local destination source files
+        destination="${@[-1]}"
+        for source in "${@[1,-2]}"; do
+            # List the files in each source directory, including
+            # hidden files.
+            files=`ls --almost-all "${source}"/.`
             if [[ -n "${files}" ]]; then
-		# For each of those files, approximate its structure,
-		# using directories and symlinks. But do not clobber
-		# anything that has already been made.
-		for f in ${files}; do
+                # For each of those files, approximate its structure,
+                # using directories and symlinks. But do not clobber
+                # anything that has already been made.
+                for f in ${files}; do
                     cp --recursive --symbolic-link --update=none \
-		       "${source}"/"${f}" "${destination}"/.
+                       "${source}"/"${f}" "${destination}"/.
                 done
 
-	    fi
-	done
+            fi
+        done
     fi
 }
 
@@ -44,4 +44,5 @@ exit 0
 # local variables:
 # mode: shell-script
 # sh-shell: zsh;
+# indent-tabs-mode: nil
 # end:
