@@ -32,13 +32,10 @@ MOSTLYCLEANFILES =
 CLEANFILES =
 DISTCLEANFILES =
 BUILT_SOURCES =
-AM_CPPFLAGS =
-AM_CFLAGS =
+AM_GNATFLAGS =
 AM_LDFLAGS =
 LDADD =
 bin_PROGRAMS =
-lib_LTLIBRARIES =
-EXTRA_PROGRAMS =
 
 EXTRA_DIST += $(srcdir)/silent-rules.mk
 EXTRA_DIST += COPYING
@@ -48,6 +45,11 @@ EXTRA_DIST += AUTHORS
 
 DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
+
+AM_GNATFLAGS += -I$(FLORISTLIB)
+AM_LDFLAGS += -lflorist
+
+bin_PROGRAMS += #make-toolchain-environment
 
 # local variables:
 # coding: utf-8

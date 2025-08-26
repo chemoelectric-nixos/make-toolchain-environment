@@ -47,7 +47,14 @@ AC_PROG_AWK
 AC_PROG_SED
 AC_PROG_FGREP
 AC_PROG_EGREP
+
 AC_CHECK_PROGS([GNATMAKE],[gnatmake])
+AC_ARG_VAR([GNATMAKE],[GNU gnatmake command])
+
+AC_ARG_VAR([FLORISTLIB],[directory containing the Florist library sources])
+if test -z "${FLORISTLIB}"; then
+   AC_MSG_ERROR([You must set FLORISTLIB to the directory of the Florist library sources.])
+fi
 
 # You can use ‘@GNU@’ to make GNU Make constructs unbothersome to
 # Automake. (By the way, you often can use ‘$(eval ...)’ as well, but

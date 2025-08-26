@@ -1062,3 +1062,18 @@ m4trace:configure.ac:47: -1- m4_pattern_allow([^SED$])
 m4trace:configure.ac:48: -1- m4_pattern_allow([^GREP$])
 m4trace:configure.ac:48: -1- m4_pattern_allow([^FGREP$])
 m4trace:configure.ac:49: -1- m4_pattern_allow([^EGREP$])
+m4trace:configure.ac:51: -1- m4_pattern_allow([^GNATMAKE$])
+m4trace:configure.ac:52: -1- m4_pattern_allow([^GNATMAKE$])
+m4trace:configure.ac:54: -1- m4_pattern_allow([^FLORISTLIB$])
+m4trace:configure.ac:62: -1- m4_pattern_allow([^GNU$])
+m4trace:configure.ac:67: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:67: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:67: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
+m4trace:configure.ac:67: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
+m4trace:configure.ac:67: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
+m4trace:configure.ac:67: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
+m4trace:configure.ac:67: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
+m4trace:configure.ac:67: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:67: -1- AM_RUN_LOG([cd "$am_dirpart" \
+      && sed -e '/# am--include-marker/d' "$am_filepart" \
+        | $MAKE -f - am--depfiles])
