@@ -658,6 +658,7 @@ ifGNUmake
 GNU_MAKE
 GNU
 FLORISTLIB
+GNATMAKEFLAGS
 GNATMAKE
 CXXCPP
 am__fastdepCXX_FALSE
@@ -819,6 +820,7 @@ CXXFLAGS
 CCC
 CXXCPP
 GNATMAKE
+GNATMAKEFLAGS
 FLORISTLIB
 GNU_MAKE'
 
@@ -1490,6 +1492,8 @@ Some influential environment variables:
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
   GNATMAKE    GNU gnatmake command
+  GNATMAKEFLAGS 
+              flags to pass to GNU gnatmake @<:@default: -g -O2 -q@:>@
   FLORISTLIB  directory containing the Florist library sources
   GNU_MAKE    GNU Make command
 
@@ -5206,8 +5210,6 @@ fi
 
 
 
-
-AM_DEFAULT_VERBOSITY=1
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 printf %s "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
@@ -19850,6 +19852,11 @@ fi
 done
 
 
+
+
+if test -z "${GNATMAKEFLAGS}"; then
+   GNATMAKEFLAGS="-g -O2 -q"
+fi
 
 
 if test -z "${FLORISTLIB}"; then

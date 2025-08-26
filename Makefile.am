@@ -24,15 +24,12 @@ AUTOMAKE_OPTIONS += foreign
 AUTOMAKE_OPTIONS += subdir-objects
 #AUTOMAKE_OPTIONS += -Wno-portability
 
-#include $(top_srcdir)/aminclude_static.am
-@GNU@ include $(top_srcdir)/silent-rules.mk
-
 EXTRA_DIST =
 MOSTLYCLEANFILES =
 CLEANFILES =
 DISTCLEANFILES =
 BUILT_SOURCES =
-AM_GNATFLAGS =
+AM_GNATMAKEFLAGS =
 AM_LDFLAGS =
 LDADD =
 bin_PROGRAMS =
@@ -46,10 +43,19 @@ EXTRA_DIST += AUTHORS
 DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
 
-AM_GNATFLAGS += -I$(FLORISTLIB)
-AM_LDFLAGS += -lflorist
+AM_GNATMAKEFLAGS += -I$(FLORISTLIB)
+AM_LDFLAGS += -largs -lflorist
 
-bin_PROGRAMS += #make-toolchain-environment
+bin_PROGRAMS += make-toolchain-environment
+make-toolchain-environment: make_toolchain_environment.adb
+	$(GNATMAKE) \
+		$(AM_GNATMAKEFLAGS) \
+		$(GNATMAKEFLAGS) \
+		$(XGNATMAKEFLAGS) \
+		$(<) $(AM_LDFLAGS) $(XLDFLAGS) \
+		-largs -o$(<)
+
+MOSTLYCLEANFILES += make_toolchain_environment.{ali,o}
 
 # local variables:
 # coding: utf-8

@@ -33,9 +33,7 @@ mkShell {
     export ac_cv_target=x86_64-unknown-linux-gnu
     export ACLOCAL_PATH="$ACLOCAL_PATH''${ACLOCAL_PATH+:}$sortsmill_autoconf_archive:${autoconf-archive}/aclocal"
     export PATH="${gnat}/bin:${gnumake}/bin:${autoconf}/bin:${autoreconfHook}/bin:${automake117x}/bin:${libtool}/bin:$PATH"
+    export FLORISTLIB="${florist}"/floristlib
 
-    cp -R "${florist}"/floristlib .
-    chmod -R +w floristlib
-    export FLORISTLIB=`pwd`/floristlib
   '';
 }
