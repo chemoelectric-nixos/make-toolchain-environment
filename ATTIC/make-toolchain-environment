@@ -5,7 +5,7 @@ progname=`basename ${0}`
 
 print_usage ()
 {
-    echo "Usage: ${progname} of-symlinks dir1 dir2 ... dirN environ-dir"
+    echo "Usage: ${progname} make-symlinks dir1 dir2 ... dirN environ-dir"
     echo "       ${progname} blahblah xxxxxxxxxxxxxxx"
 }
 
