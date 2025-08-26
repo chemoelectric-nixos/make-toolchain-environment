@@ -19,8 +19,6 @@ pragma ada_2022;
 pragma wide_character_encoding (utf8);
 pragma assertion_policy (check);
 
-pragma warnings (off, "gnatw.z");
-pragma warnings (off, "size is not a multiple of alignment");
 with posix.files;
 
 procedure make_toolchain_environment is
