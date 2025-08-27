@@ -30,8 +30,11 @@ procedure make_toolchain_environment is
   package cmdln renames ada.command_line;
   package re renames gnat.regpat;
 
+  type cmdln_argfunc is
+    access function (number : in positive) return string;
+
   re_for_shared_library : constant re.pattern_matcher :=
-                            re.compile ("^lib.+\.so(\.[0-9]+)*$");
+                            re.compile ("^lib.+\.so(\.[0-9]+){0,3}$");
 
   magic_bytes_count_for_elf : constant integer range 4 .. 4 := 4;
   magic_bytes_for_elf : constant array (0 .. 3) of natural :=
@@ -54,12 +57,13 @@ procedure make_toolchain_environment is
     cmdln.set_exit_status (cmdln.failure);
   end usage_error;
 
-  procedure do_symlinks (argcount : in natural;
-                         arg      : access function (number : in positive)
-                                    return string) is
+  procedure do_symlinks (argcount : in positive;
+                         arg      : cmdln_argfunc)
+  with pre => (2 <= argcount) is
+
 use ada.text_io;
 
-    package dirs renames ada.directories;
+    use ada.directories;
 
     subtype source_dir_range is integer range 2 .. argcount - 1;
 
@@ -76,27 +80,41 @@ use ada.text_io;
     end environ_dir;
 
     i      : source_dir_range;
-    handle : dirs.search_type;
-    f      : dirs.directory_entry_type;
+    handle : search_type;
+    f      : directory_entry_type;
 
   begin
-    if argcount < 2 then
-      usage_error;
-    else
-      for i in source_dir_range loop
-        dirs.start_search (handle, source_dir (i), "");
-        while dirs.more_entries (handle) loop
-          dirs.get_next_entry (handle, f);
-put(dirs.simple_name(f));new_line;
+    for i in source_dir_range loop
+      if exists (source_dir (i)) and then
+           kind (source_dir (i)) = directory then
+        start_search (handle, source_dir (i), "");
+        while more_entries (handle) loop
+          get_next_entry (handle, f);
+put(simple_name(f));new_line;
+put(full_name(f));new_line;
         end loop;
-        dirs.end_search (handle);
-      end loop;
-    end if;
+        end_search (handle);
+      end if;
+    end loop;
   end do_symlinks;
 
+  procedure require_environ_dir (proc : access procedure
+                                        (argcount : in positive;
+                                         arg      : cmdln_argfunc);
+                                 argcount : in natural;
+                                 arg      : cmdln_argfunc) is
+  begin
+    if argcount < 2 then
+      -- There are not enough arguments for there to be an environment
+      -- directory.
+      usage_error;
+    else
+      proc (argcount, arg);
+    end if;
+  end;
+
   procedure dispatch (argcount : in natural;
-                      arg      : access function (number : in positive)
-                                 return string) is
+                      arg      : cmdln_argfunc) is
     function operation
     return string is
     begin
@@ -106,7 +124,8 @@ put(dirs.simple_name(f));new_line;
     if argcount < 1 then
       usage_error;
     elsif operation = "symlinks" then
-      do_symlinks (argcount, arg);
+      require_environ_dir (do_symlinks'access, argcount, arg);
+--      do_symlinks (argcount, arg);
     else
       usage_error;    
     end if;
