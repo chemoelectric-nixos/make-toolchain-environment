@@ -657,7 +657,6 @@ ifnGNUmake
 ifGNUmake
 GNU_MAKE
 GNU
-FLORISTLIB
 GNATMAKEFLAGS
 GNATMAKE
 CXXCPP
@@ -821,7 +820,6 @@ CCC
 CXXCPP
 GNATMAKE
 GNATMAKEFLAGS
-FLORISTLIB
 GNU_MAKE'
 
 
@@ -1494,7 +1492,6 @@ Some influential environment variables:
   GNATMAKE    GNU gnatmake command
   GNATMAKEFLAGS 
               GNU gnatmake flags @<:@default: -g -O2@:>@
-  FLORISTLIB  directory containing the Florist library
   GNU_MAKE    GNU Make command
 
 Use these variables to override the choices made by 'configure' or to help
@@ -19853,11 +19850,6 @@ done
 
 if test "${ac_cv_env_GNATMAKEFLAGS_set}" != set; then
    GNATMAKEFLAGS="-g -O2"
-fi
-
-
-if test -z "${FLORISTLIB}"; then
-   as_fn_error $? "You must set FLORISTLIB to the directory containing the Florist library." "$LINENO" 5
 fi
 
 # You can use ‘@GNU@’ to make GNU Make constructs unbothersome to

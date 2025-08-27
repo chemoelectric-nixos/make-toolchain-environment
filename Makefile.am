@@ -17,6 +17,7 @@
 #
 
 .DELETE_ON_ERROR:
+.NOTPARALLEL:		       # Parallel building won’t help, anyway.
 
 ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS =
@@ -43,18 +44,18 @@ EXTRA_DIST += AUTHORS
 DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
 
-AM_GNATMAKEFLAGS += -I$(FLORISTLIB)
-AM_LDFLAGS += -largs -lflorist
-
 bin_PROGRAMS += make-toolchain-environment
-make-toolchain-environment: make_toolchain_environment.adb
-	$(GNATMAKE) -o $(@) \
-		$(AM_GNATMAKEFLAGS) \
-		$(GNATMAKEFLAGS) \
-		$(XGNATMAKEFLAGS) \
-		$(<) $(AM_LDFLAGS) $(XLDFLAGS)
+
+GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
+LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
+
+# The following rule produces more files than just the GNU Make
+# target, but gnatmake manages those files.
+make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb
+	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,o}
+MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,o}
 
 # local variables:
 # coding: utf-8

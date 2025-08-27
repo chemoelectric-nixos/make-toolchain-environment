@@ -52,11 +52,6 @@ if test "${ac_cv_env_GNATMAKEFLAGS_set}" != set; then
    GNATMAKEFLAGS="-g -O2"
 fi
 
-AC_ARG_VAR([FLORISTLIB],[directory containing the Florist library])
-if test -z "${FLORISTLIB}"; then
-   AC_MSG_ERROR([You must set FLORISTLIB to the directory containing the Florist library.])
-fi
-
 # You can use ‘@GNU@’ to make GNU Make constructs unbothersome to
 # Automake. (By the way, you often can use ‘$(eval ...)’ as well, but
 # @GNU@ here may be better.)

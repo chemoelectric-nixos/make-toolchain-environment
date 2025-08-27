@@ -21,11 +21,9 @@ pragma wide_character_encoding (utf8);
 pragma assertion_policy (check);
 
 with ada.command_line;
+with ada.directories;
 with ada.text_io;
-with ada.wide_wide_text_io;
 with gnat.regpat;
-with posix;
-with posix.files;
 
 procedure make_toolchain_environment is
 
@@ -41,26 +39,77 @@ procedure make_toolchain_environment is
 
   progname : constant string := cmdln.command_name;
 
+  procedure inform_about_usage is
+    use ada.text_io;
+  begin
+    put ("Usage: ");
+    put (progname);
+    put (" symlinks dir1 dir2 ... dirN environDir");
+    new_line;
+  end inform_about_usage;
+
   procedure usage_error is
-    procedure inform_about_usage is
-      use ada.wide_wide_text_io;
-      package tio renames ada.text_io;
-    begin
-      put ("Usage: ");
-      tio.put (progname);
-      put (" symlinks dir1 dir2 ... dirN environDir");
-      new_line;
-    end inform_about_usage;
   begin
     inform_about_usage;
     cmdln.set_exit_status (cmdln.failure);
   end usage_error;
 
+  procedure do_symlinks (argcount : in natural;
+                         arg      : access function (number : in positive)
+                                    return string) is
+use ada.text_io;
+
+    package dirs renames ada.directories;
+
+    subtype source_dir_range is integer range 2 .. argcount - 1;
+
+    function source_dir (n : in source_dir_range)
+    return string is
+    begin
+      return arg (n);
+    end source_dir;
+
+    function environ_dir
+    return string is
+    begin
+      return arg (argcount);
+    end environ_dir;
+
+    i      : source_dir_range;
+    handle : dirs.search_type;
+    f      : dirs.directory_entry_type;
+
+  begin
+    if argcount < 2 then
+      usage_error;
+    else
+      for i in source_dir_range loop
+        dirs.start_search (handle, source_dir (i), "");
+        while dirs.more_entries (handle) loop
+          dirs.get_next_entry (handle, f);
+put(dirs.simple_name(f));new_line;
+        end loop;
+        dirs.end_search (handle);
+      end loop;
+    end if;
+  end do_symlinks;
+
   procedure dispatch (argcount : in natural;
                       arg      : access function (number : in positive)
-                                    return string) is
+                                 return string) is
+    function operation
+    return string is
+    begin
+      return arg (1);
+    end operation;
   begin
-    usage_error;
+    if argcount < 1 then
+      usage_error;
+    elsif operation = "symlinks" then
+      do_symlinks (argcount, arg);
+    else
+      usage_error;    
+    end if;
   end dispatch;
 
 begin

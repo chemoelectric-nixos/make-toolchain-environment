@@ -6,8 +6,9 @@
 with pkgs;
 mkShell {
   buildInputs = [
-    gnat
-    florist
+    coreutils
+    gawk
+    gnat15
     gnumake
     autoconf-archive
     autoconf
@@ -32,8 +33,10 @@ mkShell {
     export ac_cv_host=x86_64-unknown-linux-gnu
     export ac_cv_target=x86_64-unknown-linux-gnu
     export ACLOCAL_PATH="$ACLOCAL_PATH''${ACLOCAL_PATH+:}$sortsmill_autoconf_archive:${autoconf-archive}/aclocal"
-    export PATH="${gnat}/bin:${gnumake}/bin:${autoconf}/bin:${autoreconfHook}/bin:${automake117x}/bin:${libtool}/bin:$PATH"
-    export FLORISTLIB="${florist}"/floristlib
+    export PATH="${gnat15}/bin:${gnumake}/bin:${autoconf}/bin:${autoreconfHook}/bin:${automake117x}/bin:${libtool}/bin:$PATH"
+    export CC="${gnat15}/bin/gcc"
+    export GCC="${gnat15}/bin/gcc"
+    export GNATMAKE="${gnat15}/bin/gnatmake"
 
   '';
 }
