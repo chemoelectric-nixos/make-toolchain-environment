@@ -876,7 +876,6 @@ uninstall-am: uninstall-binPROGRAMS
 
 
 .DELETE_ON_ERROR:
-
 make-toolchain-environment: make_toolchain_environment.adb
 	$(GNATMAKE) \
 		$(AM_GNATMAKEFLAGS) \
