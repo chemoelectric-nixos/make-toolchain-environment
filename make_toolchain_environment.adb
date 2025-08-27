@@ -23,6 +23,8 @@ pragma assertion_policy (check);
 with ada.command_line;
 with ada.directories;
 with ada.text_io;
+with interfaces.c;
+with interfaces.c.strings;
 with gnat.regpat;
 
 procedure make_toolchain_environment is
@@ -42,6 +44,36 @@ procedure make_toolchain_environment is
 
   progname : constant string := cmdln.command_name;
 
+  procedure make_symlink_no_clobber (source_name : in string;
+                                     target_name : in string) is
+    use ada.directories;
+    use interfaces.c;
+    use interfaces.c.strings;
+
+    procedure symlink (source_p : in chars_ptr;
+                       target_p : in chars_ptr);
+    pragma import (c, symlink, "symlink");
+
+    source_ptr : chars_ptr;
+    target_ptr : chars_ptr;
+
+  begin
+    if not exists (target_name) then
+      source_ptr := new_string (source_name);
+      target_ptr := new_string (target_name);
+      symlink (source_ptr, target_ptr);
+      free (source_ptr);
+      free (target_ptr);
+    end if;
+  end make_symlink_no_clobber;
+
+  procedure start_with_progname is
+    use ada.text_io;
+  begin
+    put (progname);
+    put (": ");
+  end start_with_progname;
+
   procedure inform_about_usage is
     use ada.text_io;
   begin
@@ -56,6 +88,12 @@ procedure make_toolchain_environment is
     inform_about_usage;
     cmdln.set_exit_status (cmdln.failure);
   end usage_error;
+
+  function simple_name_is_significant (name : string)
+  return boolean is
+  begin
+    return (name /= "." and then name /= "..");
+  end simple_name_is_significant;
 
   procedure do_symlinks (argcount : in positive;
                          arg      : cmdln_argfunc)
@@ -90,8 +128,11 @@ use ada.text_io;
         start_search (handle, source_dir (i), "");
         while more_entries (handle) loop
           get_next_entry (handle, f);
+          if simple_name_is_significant (simple_name (f)) then
 put(simple_name(f));new_line;
 put(full_name(f));new_line;
+make_symlink_no_clobber (full_name (f), environ_dir & "/" & simple_name (f));
+          end if;
         end loop;
         end_search (handle);
       end if;
@@ -103,10 +144,27 @@ put(full_name(f));new_line;
                                          arg      : cmdln_argfunc);
                                  argcount : in natural;
                                  arg      : cmdln_argfunc) is
+    use ada.directories;
+    use ada.text_io;
+
+    function environ_dir
+    return string is
+    begin
+      return arg (argcount);
+    end environ_dir;
+
   begin
     if argcount < 2 then
-      -- There are not enough arguments for there to be an environment
-      -- directory.
+      start_with_progname;
+      put ("You must specify some directories.");
+      new_line;
+      usage_error;
+    elsif not exists (environ_dir) or else
+        kind (environ_dir) /= directory then
+      start_with_progname;
+      put (environ_dir);
+      put (" is not a directory.");
+      new_line;
       usage_error;
     else
       proc (argcount, arg);
@@ -125,7 +183,6 @@ put(full_name(f));new_line;
       usage_error;
     elsif operation = "symlinks" then
       require_environ_dir (do_symlinks'access, argcount, arg);
---      do_symlinks (argcount, arg);
     else
       usage_error;    
     end if;
