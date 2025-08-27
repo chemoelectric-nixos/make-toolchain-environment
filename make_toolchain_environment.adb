@@ -33,8 +33,8 @@ procedure make_toolchain_environment is
   re_for_shared_library : constant re.pattern_matcher :=
                             re.compile ("^lib.+\.so(\.[0-9]+)*$");
 
-  magic_bytes_count_for_elf : constant integer := 4;
-  magic_bytes_for_elf : constant array (0 .. 3) of integer :=
+  magic_bytes_count_for_elf : constant integer range 4 .. 4 := 4;
+  magic_bytes_for_elf : constant array (0 .. 3) of natural :=
                           ( 16#7f#, 16#45#, 16#4c#, 16#46# );
 
   progname : string := "<program name>";
