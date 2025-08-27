@@ -877,12 +877,11 @@ uninstall-am: uninstall-binPROGRAMS
 
 .DELETE_ON_ERROR:
 make-toolchain-environment: make_toolchain_environment.adb
-	$(GNATMAKE) \
+	$(GNATMAKE) -o $(@) \
 		$(AM_GNATMAKEFLAGS) \
 		$(GNATMAKEFLAGS) \
 		$(XGNATMAKEFLAGS) \
-		$(<) $(AM_LDFLAGS) $(XLDFLAGS) \
-		-largs -o$(<)
+		$(<) $(AM_LDFLAGS) $(XLDFLAGS)
 
 # local variables:
 # coding: utf-8

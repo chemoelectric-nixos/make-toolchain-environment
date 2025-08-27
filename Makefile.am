@@ -48,12 +48,11 @@ AM_LDFLAGS += -largs -lflorist
 
 bin_PROGRAMS += make-toolchain-environment
 make-toolchain-environment: make_toolchain_environment.adb
-	$(GNATMAKE) \
+	$(GNATMAKE) -o $(@) \
 		$(AM_GNATMAKEFLAGS) \
 		$(GNATMAKEFLAGS) \
 		$(XGNATMAKEFLAGS) \
-		$(<) $(AM_LDFLAGS) $(XLDFLAGS) \
-		-largs -o$(<)
+		$(<) $(AM_LDFLAGS) $(XLDFLAGS)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,o}
 
