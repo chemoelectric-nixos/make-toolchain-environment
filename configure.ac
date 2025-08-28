@@ -19,7 +19,7 @@
 AC_PREREQ([2.72])
 AC_INIT([Make Toolchain Environment],[1.0.0])
 
-AC_CONFIG_SRCDIR([this.is.make-toolchain-environment])
+AC_CONFIG_SRCDIR([make_toolchain_environment.adb])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])

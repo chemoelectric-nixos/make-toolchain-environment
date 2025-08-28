@@ -35,7 +35,6 @@ AM_LDFLAGS =
 LDADD =
 bin_PROGRAMS =
 
-EXTRA_DIST += $(srcdir)/silent-rules.mk
 EXTRA_DIST += COPYING
 EXTRA_DIST += INSTALL
 EXTRA_DIST += README
@@ -45,15 +44,19 @@ DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
 
 bin_PROGRAMS += make-toolchain-environment
+make_toolchain_environment_SOURCES =
 
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 
+EXTRA_DIST += make_toolchain_environment.adb
+make_toolchain_environment_SOURCES += EIO_value.c
 AM_LDFLAGS += EIO_value.$(OBJEXT)
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
-make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb EIO_value.$(OBJEXT)
+make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
+					EIO_value.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}

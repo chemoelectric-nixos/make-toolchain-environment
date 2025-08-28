@@ -129,9 +129,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-make_toolchain_environment_SOURCES = make-toolchain-environment.c
+am_make_toolchain_environment_OBJECTS = EIO_value.$(OBJEXT)
 make_toolchain_environment_OBJECTS =  \
-	make-toolchain-environment.$(OBJEXT)
+	$(am_make_toolchain_environment_OBJECTS)
 make_toolchain_environment_LDADD = $(LDADD)
 make_toolchain_environment_DEPENDENCIES =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -153,7 +153,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/make-toolchain-environment.Po
+am__depfiles_remade = ./$(DEPDIR)/EIO_value.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -173,8 +173,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = make-toolchain-environment.c
-DIST_SOURCES = make-toolchain-environment.c
+SOURCES = $(make_toolchain_environment_SOURCES)
+DIST_SOURCES = $(make_toolchain_environment_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -366,7 +366,8 @@ top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS = foreign subdir-objects
 #AUTOMAKE_OPTIONS += -Wno-portability
-EXTRA_DIST = $(srcdir)/silent-rules.mk COPYING INSTALL README AUTHORS
+EXTRA_DIST = COPYING INSTALL README AUTHORS \
+	make_toolchain_environment.adb
 MOSTLYCLEANFILES = make_toolchain_environment.{ali,$(OBJEXT)} \
 	b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)} \
 	EIO_value.{lo,$(OBJEXT)}
@@ -376,6 +377,7 @@ BUILT_SOURCES =
 AM_GNATMAKEFLAGS = 
 AM_LDFLAGS = EIO_value.$(OBJEXT)
 LDADD = 
+make_toolchain_environment_SOURCES = EIO_value.c
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 all: $(BUILT_SOURCES)
@@ -467,7 +469,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make-toolchain-environment.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EIO_value.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -788,7 +790,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -f ./$(DEPDIR)/make-toolchain-environment.Po
+	-rm -f ./$(DEPDIR)/EIO_value.Po
 	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -836,7 +838,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -f ./$(DEPDIR)/make-toolchain-environment.Po
+	-rm -f ./$(DEPDIR)/EIO_value.Po
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -883,7 +885,8 @@ uninstall-am: uninstall-binPROGRAMS
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
-make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb EIO_value.$(OBJEXT)
+make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
+					EIO_value.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
 
 # local variables:
