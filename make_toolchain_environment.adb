@@ -35,6 +35,8 @@ procedure make_toolchain_environment is
   type cmdln_argfunc is
     access function (number : in positive) return string;
 
+  c_io_error : exception;
+
   re_for_shared_library : constant re.pattern_matcher :=
                             re.compile ("^lib.+\.so(\.[0-9]+){0,3}$");
 
@@ -44,26 +46,53 @@ procedure make_toolchain_environment is
 
   progname : constant string := cmdln.command_name;
 
+  procedure perhaps_notify (notify  : in boolean;
+                            message : in string) is
+    use ada.text_io;
+  begin
+    if notify then
+      put (message);
+      new_line;
+    end if;
+  end perhaps_notify;
+
   procedure make_symlink_no_clobber (source_name : in string;
-                                     target_name : in string) is
+                                     target_name : in string;
+                                     warn        : boolean) is
     use ada.directories;
     use interfaces.c;
     use interfaces.c.strings;
 
-    procedure symlink (source_p : in chars_ptr;
-                       target_p : in chars_ptr);
+    function symlink (source_p : in chars_ptr;
+                      target_p : in chars_ptr)
+    return int;
     pragma import (c, symlink, "symlink");
+
+    function EIO_value
+    return int;
+    pragma import (c, EIO_value, "EIO_value");
 
     source_ptr : chars_ptr;
     target_ptr : chars_ptr;
+    retval     : int;
 
   begin
-    if not exists (target_name) then
+    if exists (target_name) then
+      perhaps_notify (warn, "Not overwriting " & target_name);
+    else
       source_ptr := new_string (source_name);
       target_ptr := new_string (target_name);
-      symlink (source_ptr, target_ptr);
+      retval := symlink (source_ptr, target_ptr);
       free (source_ptr);
       free (target_ptr);
+      if retval /= 0 then
+        if retval /= EIO_value then
+          perhaps_notify (warn, "Not overwriting " & target_name);
+        else
+          raise c_io_error with
+            ("I/O error creating symlink " & target_name);
+        end if;
+      end if;
     end if;
   end make_symlink_no_clobber;
 
@@ -79,7 +108,11 @@ procedure make_toolchain_environment is
   begin
     put ("Usage: ");
     put (progname);
-    put (" symlinks dir1 dir2 ... dirN environDir");
+    put (" symlinks+ dir1 dir2 ... dirN environDir");
+    new_line;
+    put ("       ");
+    put (progname);
+    put (" symlinks- dir1 dir2 ... dirN environDir");
     new_line;
   end inform_about_usage;
 
@@ -96,7 +129,8 @@ procedure make_toolchain_environment is
   end simple_name_is_significant;
 
   procedure do_symlinks (argcount : in positive;
-                         arg      : cmdln_argfunc)
+                         arg      : cmdln_argfunc;
+                         warn     : boolean)
   with pre => (2 <= argcount) is
 
 use ada.text_io;
@@ -123,15 +157,20 @@ use ada.text_io;
 
   begin
     for i in source_dir_range loop
-      if exists (source_dir (i)) and then
-           kind (source_dir (i)) = directory then
+      if not exists (source_dir (i)) then
+        perhaps_notify (warn, source_dir (i) & " does not exist.");
+      elsif kind (source_dir (i)) /= directory then
+        perhaps_notify (warn, source_dir (i) & " is not a directory.");
+      else
         start_search (handle, source_dir (i), "");
         while more_entries (handle) loop
           get_next_entry (handle, f);
           if simple_name_is_significant (simple_name (f)) then
-put(simple_name(f));new_line;
-put(full_name(f));new_line;
-make_symlink_no_clobber (full_name (f), environ_dir & "/" & simple_name (f));
+--put(simple_name(f));new_line;
+--put(full_name(f));new_line;
+make_symlink_no_clobber (source_name => full_name (f),
+                         target_name => environ_dir & "/" & simple_name (f),
+                         warn => warn);
           end if;
         end loop;
         end_search (handle);
@@ -141,9 +180,11 @@ make_symlink_no_clobber (full_name (f), environ_dir & "/" & simple_name (f));
 
   procedure require_environ_dir (proc : access procedure
                                         (argcount : in positive;
-                                         arg      : cmdln_argfunc);
+                                         arg      : cmdln_argfunc;
+                                         warn     : boolean);
                                  argcount : in natural;
-                                 arg      : cmdln_argfunc) is
+                                 arg      : cmdln_argfunc;
+                                 warn     : boolean) is
     use ada.directories;
     use ada.text_io;
 
@@ -167,7 +208,7 @@ make_symlink_no_clobber (full_name (f), environ_dir & "/" & simple_name (f));
       new_line;
       usage_error;
     else
-      proc (argcount, arg);
+      proc (argcount, arg, warn);
     end if;
   end;
 
@@ -181,8 +222,10 @@ make_symlink_no_clobber (full_name (f), environ_dir & "/" & simple_name (f));
   begin
     if argcount < 1 then
       usage_error;
-    elsif operation = "symlinks" then
-      require_environ_dir (do_symlinks'access, argcount, arg);
+    elsif operation = "symlinks+" then
+      require_environ_dir (do_symlinks'access, argcount, arg, true);
+    elsif operation = "symlinks-" then
+      require_environ_dir (do_symlinks'access, argcount, arg, false);
     else
       usage_error;    
     end if;

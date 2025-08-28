@@ -47,15 +47,18 @@ DISTCLEANFILES += GNUmakefile
 bin_PROGRAMS += make-toolchain-environment
 
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
-LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
+LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
+
+AM_LDFLAGS += EIO_value.$(OBJEXT)
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
-make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb
+make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb EIO_value.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
 
-MOSTLYCLEANFILES += make_toolchain_environment.{ali,o}
-MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,o}
+MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
+MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)}
+MOSTLYCLEANFILES += EIO_value.{lo,$(OBJEXT)}
 
 # local variables:
 # coding: utf-8

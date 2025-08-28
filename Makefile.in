@@ -367,16 +367,17 @@ ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS = foreign subdir-objects
 #AUTOMAKE_OPTIONS += -Wno-portability
 EXTRA_DIST = $(srcdir)/silent-rules.mk COPYING INSTALL README AUTHORS
-MOSTLYCLEANFILES = make_toolchain_environment.{ali,o} \
-	b~make_toolchain_environment.{adb,ads,ali,o}
+MOSTLYCLEANFILES = make_toolchain_environment.{ali,$(OBJEXT)} \
+	b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)} \
+	EIO_value.{lo,$(OBJEXT)}
 CLEANFILES = 
 DISTCLEANFILES = Makefile GNUmakefile
 BUILT_SOURCES = 
 AM_GNATMAKEFLAGS = 
-AM_LDFLAGS = 
+AM_LDFLAGS = EIO_value.$(OBJEXT)
 LDADD = 
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
-LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
+LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -882,7 +883,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
-make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb
+make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb EIO_value.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
 
 # local variables:
