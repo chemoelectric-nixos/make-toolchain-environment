@@ -369,8 +369,7 @@ AUTOMAKE_OPTIONS = foreign subdir-objects
 EXTRA_DIST = COPYING INSTALL README AUTHORS \
 	make_toolchain_environment.adb
 MOSTLYCLEANFILES = make_toolchain_environment.{ali,$(OBJEXT)} \
-	b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)} \
-	EIO_value.{lo,$(OBJEXT)}
+	b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)}
 CLEANFILES = 
 DISTCLEANFILES = Makefile GNUmakefile
 BUILT_SOURCES = 

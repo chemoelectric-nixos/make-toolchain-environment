@@ -61,7 +61,6 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
 MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)}
-MOSTLYCLEANFILES += EIO_value.{lo,$(OBJEXT)}
 
 # local variables:
 # coding: utf-8
