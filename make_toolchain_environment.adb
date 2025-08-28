@@ -45,7 +45,7 @@ procedure make_toolchain_environment is
                             re.compile ("^/.*");
 
   re_for_shared_library : constant re.pattern_matcher :=
-                            re.compile ("^lib.+\.so(\.[0-9]+){0,3}$");
+                      re.compile ("^.*/lib.+\.so(\.[0-9]+){0,3}$");
 
   magic_bytes_count_for_ELF : constant integer range 4 .. 4 := 4;
   subtype magic_bytes_range_for_ELF is
@@ -73,6 +73,12 @@ procedure make_toolchain_environment is
   begin
     return re.match (re_for_absolute_path, path_name);
   end path_name_is_absolute;
+
+  function path_name_is_shared_library (path_name : in string)
+  return boolean is
+  begin
+    return re.match (re_for_shared_library, path_name);
+  end path_name_is_shared_library;
 
   function file_seems_to_be_ELF (file : char_io.file_type)
   return boolean is
@@ -151,6 +157,39 @@ procedure make_toolchain_environment is
     end if;
   end make_symlink_no_clobber;
 
+  procedure make_linker_script_for_shared_library (source_name : in string;
+                                                   target_name : in string;
+                                                   warn : boolean) is
+    use ada.text_io;
+    file : file_type;
+  begin
+    create (file => file, mode => out_file, name => target_name);
+    put (file => file, item => "GROUP ( ");
+    put (file => file, item => source_name);
+    put (file => file, item => " )");
+    new_line (file => file);
+    close (file => file);
+  end make_linker_script_for_shared_library;
+
+  procedure make_linker_script_or_symlink (source_name : in string;
+                                           target_name : in string;
+                                           warn        : boolean) is
+    use ada.directories;
+  begin
+    if exists (target_name) then
+      perhaps_notify (warn, "Not overwriting " & target_name);
+    elsif path_name_is_shared_library (source_name)
+          and then file_seems_to_be_ELF (source_name) then
+      make_linker_script_for_shared_library (source_name => source_name,
+                                             target_name => target_name,
+                                             warn => warn);
+    else
+      make_symlink_no_clobber (source_name => source_name,
+                               target_name => target_name,
+                               warn => warn);
+    end if;
+  end make_linker_script_or_symlink;
+
   procedure start_with_progname is
     use ada.text_io;
   begin
@@ -168,6 +207,14 @@ procedure make_toolchain_environment is
     put ("       ");
     put (progname);
     put (" symlinks- dir1 dir2 ... dirN environDir");
+    new_line;
+    put ("       ");
+    put (progname);
+    put (" libraries+ dir1 dir2 ... dirN environDir");
+    new_line;
+    put ("       ");
+    put (progname);
+    put (" libraries- dir1 dir2 ... dirN environDir");
     new_line;
   end inform_about_usage;
 
@@ -275,6 +322,14 @@ procedure make_toolchain_environment is
                       argcount, arg, warn);
   end do_symlinks;
 
+  procedure do_libraries (argcount : in positive;
+                          arg      : cmdln_argfunc;
+                          warn     : in boolean) is
+  begin
+    do_quasi_copying (make_linker_script_or_symlink'access,
+                      argcount, arg, warn);
+  end do_libraries;
+
   procedure require_correct_dirs (proc     : environ_dir_filler;
                                   argcount : in natural;
                                   arg      : cmdln_argfunc;
@@ -346,6 +401,10 @@ procedure make_toolchain_environment is
       require_correct_dirs (do_symlinks'access, argcount, arg, true);
     elsif operation = "symlinks-" then
       require_correct_dirs (do_symlinks'access, argcount, arg, false);
+    elsif operation = "libraries+" then
+      require_correct_dirs (do_libraries'access, argcount, arg, true);
+    elsif operation = "libraries-" then
+      require_correct_dirs (do_libraries'access, argcount, arg, false);
     else
       usage_error;    
     end if;
