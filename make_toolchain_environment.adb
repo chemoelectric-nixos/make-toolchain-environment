@@ -205,7 +205,11 @@ procedure make_toolchain_environment is
               src_dir   : constant string := source_dir & "/" & base_name;
               env_dir   : constant string := environ_dir & "/" & base_name;
             begin
-              create_directory (env_dir);
+              if exists (env_dir) then
+                perhaps_notify (warn, "Not overwriting " & env_dir);
+              else
+                create_directory (env_dir);
+              end if;
               do_symlinks (source_dir => src_dir,
                            environ_dir => env_dir,
                            warn => warn);
