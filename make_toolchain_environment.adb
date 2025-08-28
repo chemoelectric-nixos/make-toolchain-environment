@@ -187,9 +187,14 @@ procedure make_toolchain_environment is
                                                arg      : cmdln_argfunc;
                                                warn     : in boolean);
 
-  procedure do_symlinks (source_dir  : in string;
-                         environ_dir : in string;
-                         warn        : in boolean) is
+  type quasi_copier is access procedure (source_name : in string;
+                                         target_name : in string;
+                                         warn        : in boolean);
+
+  procedure do_quasi_copying (quasi_copy  : quasi_copier;
+                              source_dir  : in string;
+                              environ_dir : in string;
+                              warn        : in boolean) is
     use ada.directories;
     handle : search_type;
     f      : directory_entry_type;
@@ -210,24 +215,25 @@ procedure make_toolchain_environment is
               else
                 create_directory (env_dir);
               end if;
-              do_symlinks (source_dir => src_dir,
-                           environ_dir => env_dir,
-                           warn => warn);
+              do_quasi_copying (quasi_copy => quasi_copy,
+                                source_dir => src_dir,
+                                environ_dir => env_dir,
+                                warn => warn);
             end;
           when others =>
-            make_symlink_no_clobber
-              (source_name => full_name (f),
-               target_name => environ_dir & "/" & simple_name (f),
-               warn => warn);
+            quasi_copy (source_name => full_name (f),
+                        target_name => environ_dir & "/" & simple_name (f),
+                        warn => warn);
         end case;
       end if;
     end loop;
     end_search (handle);
-  end do_symlinks;
+  end do_quasi_copying;
 
-  procedure do_symlinks (argcount : in positive;
-                         arg      : cmdln_argfunc;
-                         warn     : in boolean)
+  procedure do_quasi_copying (quasi_copy : quasi_copier;
+                              argcount   : in positive;
+                              arg        : cmdln_argfunc;
+                              warn       : in boolean)
   with pre => (2 <= argcount) is
 
     use ada.directories;
@@ -253,11 +259,20 @@ procedure make_toolchain_environment is
       elsif kind (source_dir (i)) /= directory then
         perhaps_notify (warn, source_dir (i) & " is not a directory.");
       else
-        do_symlinks (source_dir => source_dir (i),
-                     environ_dir => environ_dir,
-                     warn => warn);
+        do_quasi_copying (quasi_copy => quasi_copy,
+                          source_dir => source_dir (i),
+                          environ_dir => environ_dir,
+                          warn => warn);
       end if;
     end loop;
+  end do_quasi_copying;
+
+  procedure do_symlinks (argcount : in positive;
+                         arg      : cmdln_argfunc;
+                         warn     : in boolean) is
+  begin
+    do_quasi_copying (make_symlink_no_clobber'access,
+                      argcount, arg, warn);
   end do_symlinks;
 
   procedure require_correct_dirs (proc     : environ_dir_filler;
