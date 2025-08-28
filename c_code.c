@@ -18,8 +18,8 @@
 --
 */
 
-#include <unistd.h>
 #include <errno.h>
+#include <unistd.h>
 
 int
 EIO_value (void)

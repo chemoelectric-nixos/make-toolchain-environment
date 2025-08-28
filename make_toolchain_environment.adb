@@ -37,6 +37,9 @@ procedure make_toolchain_environment is
 
   c_io_error : exception;
 
+  re_for_absolute_path : constant re.pattern_matcher :=
+                            re.compile ("^/.*");
+
   re_for_shared_library : constant re.pattern_matcher :=
                             re.compile ("^lib.+\.so(\.[0-9]+){0,3}$");
 
@@ -55,6 +58,12 @@ procedure make_toolchain_environment is
       new_line;
     end if;
   end perhaps_notify;
+
+  function path_name_is_absolute (path_name : in string)
+  return boolean is
+  begin
+    return re.match (re_for_absolute_path, path_name);
+  end path_name_is_absolute;
 
   procedure make_symlink_no_clobber (source_name : in string;
                                      target_name : in string;
@@ -122,18 +131,54 @@ procedure make_toolchain_environment is
     cmdln.set_exit_status (cmdln.failure);
   end usage_error;
 
-  function simple_name_is_significant (name : string)
+  function simple_name_is_significant (name : in string)
   return boolean is
   begin
     return (name /= "." and then name /= "..");
   end simple_name_is_significant;
 
+  type environ_dir_filler is access procedure (argcount : in positive;
+                                               arg      : cmdln_argfunc;
+                                               warn     : in boolean);
+
+  procedure do_symlinks (source_dir  : in string;
+                         environ_dir : in string;
+                         warn        : in boolean) is
+    use ada.directories;
+    handle : search_type;
+    f      : directory_entry_type;
+  begin
+    start_search (handle, source_dir, "");
+    while more_entries (handle) loop
+      get_next_entry (handle, f);
+      if simple_name_is_significant (simple_name (f)) then
+        case kind (f) is
+          when directory =>
+            declare
+              base_name : constant string := simple_name (f);
+              src_dir   : constant string := source_dir & "/" & base_name;
+              env_dir   : constant string := environ_dir & "/" & base_name;
+            begin
+              create_directory (env_dir);
+              do_symlinks (source_dir => src_dir,
+                           environ_dir => env_dir,
+                           warn => warn);
+            end;
+          when others =>
+            make_symlink_no_clobber
+              (source_name => full_name (f),
+               target_name => environ_dir & "/" & simple_name (f),
+               warn => warn);
+        end case;
+      end if;
+    end loop;
+    end_search (handle);
+  end do_symlinks;
+
   procedure do_symlinks (argcount : in positive;
                          arg      : cmdln_argfunc;
-                         warn     : boolean)
+                         warn     : in boolean)
   with pre => (2 <= argcount) is
-
-use ada.text_io;
 
     use ada.directories;
 
@@ -151,10 +196,6 @@ use ada.text_io;
       return arg (argcount);
     end environ_dir;
 
-    i      : source_dir_range;
-    handle : search_type;
-    f      : directory_entry_type;
-
   begin
     for i in source_dir_range loop
       if not exists (source_dir (i)) then
@@ -162,37 +203,49 @@ use ada.text_io;
       elsif kind (source_dir (i)) /= directory then
         perhaps_notify (warn, source_dir (i) & " is not a directory.");
       else
-        start_search (handle, source_dir (i), "");
-        while more_entries (handle) loop
-          get_next_entry (handle, f);
-          if simple_name_is_significant (simple_name (f)) then
---put(simple_name(f));new_line;
---put(full_name(f));new_line;
-make_symlink_no_clobber (source_name => full_name (f),
-                         target_name => environ_dir & "/" & simple_name (f),
-                         warn => warn);
-          end if;
-        end loop;
-        end_search (handle);
+        do_symlinks (source_dir => source_dir (i),
+                     environ_dir => environ_dir,
+                     warn => warn);
       end if;
     end loop;
   end do_symlinks;
 
-  procedure require_environ_dir (proc : access procedure
-                                        (argcount : in positive;
-                                         arg      : cmdln_argfunc;
-                                         warn     : boolean);
-                                 argcount : in natural;
-                                 arg      : cmdln_argfunc;
-                                 warn     : boolean) is
+  procedure require_correct_dirs (proc     : environ_dir_filler;
+                                  argcount : in natural;
+                                  arg      : cmdln_argfunc;
+                                  warn     : in boolean) is
     use ada.directories;
     use ada.text_io;
+
+    subtype source_dir_range is integer range 2 .. argcount - 1;
+
+    function source_dir (n : in source_dir_range)
+    return string is
+    begin
+      return arg (n);
+    end source_dir;
 
     function environ_dir
     return string is
     begin
       return arg (argcount);
     end environ_dir;
+
+    function source_dirs_are_all_absolute
+    return boolean is
+      all_absolute : boolean := true;
+    begin
+      for i in source_dir_range loop
+        if not path_name_is_absolute (source_dir (i)) then
+          all_absolute := false;
+          put ("The source directory ");
+          put (source_dir (i));
+          put (" must instead be an absolute path.");
+          new_line;
+        end if;
+      end loop;
+      return all_absolute;
+    end source_dirs_are_all_absolute;
 
   begin
     if argcount < 2 then
@@ -206,6 +259,8 @@ make_symlink_no_clobber (source_name => full_name (f),
       put (environ_dir);
       put (" is not a directory.");
       new_line;
+      usage_error;
+    elsif not source_dirs_are_all_absolute then
       usage_error;
     else
       proc (argcount, arg, warn);
@@ -223,9 +278,9 @@ make_symlink_no_clobber (source_name => full_name (f),
     if argcount < 1 then
       usage_error;
     elsif operation = "symlinks+" then
-      require_environ_dir (do_symlinks'access, argcount, arg, true);
+      require_correct_dirs (do_symlinks'access, argcount, arg, true);
     elsif operation = "symlinks-" then
-      require_environ_dir (do_symlinks'access, argcount, arg, false);
+      require_correct_dirs (do_symlinks'access, argcount, arg, false);
     else
       usage_error;    
     end if;

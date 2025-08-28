@@ -50,13 +50,13 @@ GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 
 EXTRA_DIST += make_toolchain_environment.adb
-make_toolchain_environment_SOURCES += EIO_value.c
-AM_LDFLAGS += EIO_value.$(OBJEXT)
+make_toolchain_environment_SOURCES += c_code.c
+AM_LDFLAGS += c_code.$(OBJEXT)
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
 make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
-					EIO_value.$(OBJEXT)
+					c_code.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
