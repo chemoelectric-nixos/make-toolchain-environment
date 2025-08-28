@@ -22,6 +22,7 @@ pragma assertion_policy (check);
 
 with ada.command_line;
 with ada.directories;
+with ada.sequential_io;
 with ada.text_io;
 with interfaces.c;
 with interfaces.c.strings;
@@ -31,6 +32,9 @@ procedure make_toolchain_environment is
 
   package cmdln renames ada.command_line;
   package re renames gnat.regpat;
+
+  package character_io is new ada.sequential_io (character);
+  package char_io renames character_io;
 
   type cmdln_argfunc is
     access function (number : in positive) return string;
@@ -43,9 +47,14 @@ procedure make_toolchain_environment is
   re_for_shared_library : constant re.pattern_matcher :=
                             re.compile ("^lib.+\.so(\.[0-9]+){0,3}$");
 
-  magic_bytes_count_for_elf : constant integer range 4 .. 4 := 4;
-  magic_bytes_for_elf : constant array (0 .. 3) of natural :=
-                          ( 16#7f#, 16#45#, 16#4c#, 16#46# );
+  magic_bytes_count_for_ELF : constant integer range 4 .. 4 := 4;
+  subtype magic_bytes_range_for_ELF is
+     integer range 1 .. magic_bytes_count_for_ELF;
+  magic_bytes_for_ELF : constant array (magic_bytes_range_for_ELF)
+                            of character := ( character'val (16#7f#),
+                                              character'val (16#45#),
+                                              character'val (16#4c#),
+                                              character'val (16#46#) );
 
   progname : constant string := cmdln.command_name;
 
@@ -64,6 +73,43 @@ procedure make_toolchain_environment is
   begin
     return re.match (re_for_absolute_path, path_name);
   end path_name_is_absolute;
+
+  function file_seems_to_be_ELF (file : char_io.file_type)
+  return boolean is
+    seems_ELF : boolean := true;
+    i         : integer := 1;
+    c         : character;
+  begin
+    while seems_ELF and i <= magic_bytes_count_for_ELF loop
+      if char_io.end_of_file (file) then
+        seems_ELF := false;
+      else
+        char_io.read (file => file, item => c);
+        if c /= magic_bytes_for_ELF (i) then
+          seems_ELF := false;
+        end if;
+      end if;
+      i := i + 1;
+    end loop;
+    return seems_ELF;
+  end file_seems_to_be_ELF;
+
+  function file_seems_to_be_ELF (file_name : in string)
+  return boolean is
+    use ada.directories;
+    use char_io;
+    file      : file_type;
+    seems_ELF : boolean;
+  begin
+    if exists (file_name) then
+      open (file => file, mode => in_file, name => file_name);
+      seems_ELF := file_seems_to_be_ELF (file);
+      close (file => file);
+    else
+      seems_ELF := false;
+    end if;
+    return seems_ELF;
+  end file_seems_to_be_ELF;
 
   procedure make_symlink_no_clobber (source_name : in string;
                                      target_name : in string;

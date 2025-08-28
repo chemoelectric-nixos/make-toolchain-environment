@@ -47,7 +47,7 @@ bin_PROGRAMS += make-toolchain-environment
 make_toolchain_environment_SOURCES =
 
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
-LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
+LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 
 EXTRA_DIST += make_toolchain_environment.adb
 make_toolchain_environment_SOURCES += c_code.c
@@ -57,7 +57,7 @@ AM_LDFLAGS += c_code.$(OBJEXT)
 # target, but gnatmake manages those files.
 make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					c_code.$(OBJEXT)
-	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
+	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
 MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)}

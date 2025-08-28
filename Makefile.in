@@ -378,7 +378,7 @@ AM_LDFLAGS = c_code.$(OBJEXT)
 LDADD = 
 make_toolchain_environment_SOURCES = c_code.c
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
-LDFLAGS_TOTAL = -largs $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
+LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -886,7 +886,7 @@ uninstall-am: uninstall-binPROGRAMS
 # target, but gnatmake manages those files.
 make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					c_code.$(OBJEXT)
-	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) $(LDFLAGS_TOTAL)
+	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
 
 # local variables:
 # coding: utf-8
