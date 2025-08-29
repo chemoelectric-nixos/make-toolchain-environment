@@ -956,8 +956,8 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 # Allow ‘mte’ as a shorthand for ‘make-toolchain-environment’.
 mte: $(srcdir)/Makefile.am
 	( echo '#!'$(SHELL); \
-	  echo 'SCRIPT_DIR=$$(dirname `readlink -f "$$0"`)'; \
-	  echo 'exec $${SCRIPT_DIR}/make-toolchain-environment$(EXEEXT) "$$@"' ) \
+	  echo 'SCRIPT_DIR="$$(dirname `readlink -f "$$0"`)"'; \
+	  echo 'exec "$${SCRIPT_DIR}"/make-toolchain-environment$(EXEEXT) "$$@"' ) \
 		> $(@) && chmod 755 $(@)
 
 # local variables:
