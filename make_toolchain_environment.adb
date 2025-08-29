@@ -41,8 +41,11 @@ procedure make_toolchain_environment is
 
   c_io_error : exception;
 
+  re_for_progname : constant re.pattern_matcher :=
+                             re.compile ("/([^/]*)$");
+
   re_for_absolute_path : constant re.pattern_matcher :=
-                            re.compile ("^/.*");
+                                  re.compile ("^/.*");
 
   re_for_shared_library : constant re.pattern_matcher :=
                       re.compile ("^.*/lib.+\.so(\.[0-9]+){0,3}$");
@@ -56,7 +59,14 @@ procedure make_toolchain_environment is
                                               character'val (16#4c#),
                                               character'val (16#46#) );
 
-  progname : constant string := cmdln.command_name;
+  progname : string := cmdln.command_name;
+
+  procedure put_progname is
+    use ada.text_io;
+    i : constant natural := re.match (re_for_progname, progname, 1) + 1;
+  begin
+    put (progname (i .. progname'last));
+  end put_progname;
 
   procedure perhaps_notify (notify  : in boolean;
                             message : in string) is
@@ -193,7 +203,7 @@ procedure make_toolchain_environment is
   procedure start_with_progname is
     use ada.text_io;
   begin
-    put (progname);
+    put_progname;
     put (": ");
   end start_with_progname;
 
@@ -201,19 +211,19 @@ procedure make_toolchain_environment is
     use ada.text_io;
   begin
     put ("Usage: ");
-    put (progname);
+    put_progname;
     put (" symlinks+ dir1 dir2 ... dirN environDir");
     new_line;
     put ("       ");
-    put (progname);
+    put_progname;
     put (" symlinks- dir1 dir2 ... dirN environDir");
     new_line;
     put ("       ");
-    put (progname);
+    put_progname;
     put (" libraries+ dir1 dir2 ... dirN environDir");
     new_line;
     put ("       ");
-    put (progname);
+    put_progname;
     put (" libraries- dir1 dir2 ... dirN environDir");
     new_line;
   end inform_about_usage;
