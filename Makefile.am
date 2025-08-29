@@ -34,6 +34,7 @@ AM_GNATMAKEFLAGS =
 AM_LDFLAGS =
 LDADD =
 bin_PROGRAMS =
+bin_SCRIPTS =
 
 EXTRA_DIST += COPYING
 EXTRA_DIST += INSTALL
@@ -45,6 +46,9 @@ DISTCLEANFILES += GNUmakefile
 
 bin_PROGRAMS += make-toolchain-environment
 make_toolchain_environment_SOURCES =
+
+bin_SCRIPTS += mte
+DISTCLEANFILES += mte
 
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
@@ -58,6 +62,12 @@ AM_LDFLAGS += c_code.$(OBJEXT)
 make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					c_code.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
+
+# Allow ‘mte’ as a shorthand for ‘make-toolchain-environment’.
+mte: $(srcdir)/Makefile.am
+	( echo '#!' $(SHELL); \
+	  echo 'exec make-toolchain-environment$(EXEEXT) "$@"' ) > $(@) && \
+	chmod 755 $(@)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
 MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)}
