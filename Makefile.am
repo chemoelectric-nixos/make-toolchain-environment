@@ -66,7 +66,7 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 # Allow ‘mte’ as a shorthand for ‘make-toolchain-environment’.
 mte: $(srcdir)/Makefile.am
 	( echo '#!'$(SHELL); \
-	  echo 'exec make-toolchain-environment$(EXEEXT) "$@"' ) > $(@) && \
+	  echo 'exec make-toolchain-environment$(EXEEXT) "$$@"' ) > $(@) && \
 	chmod 755 $(@)
 
 MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
