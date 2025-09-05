@@ -22,6 +22,7 @@ pragma assertion_policy (check);
 
 with ada.command_line;
 with ada.directories;
+with ada.exceptions;
 with ada.sequential_io;
 with ada.text_io;
 with interfaces.c;
@@ -240,6 +241,16 @@ procedure make_toolchain_environment is
     return (name /= "." and then name /= "..");
   end simple_name_is_significant;
 
+  procedure create_directory_forgivingly (new_directory : in string;
+                                          warn          : in boolean) is
+    use ada.directories;
+  begin
+    create_directory (new_directory => new_directory);
+  exception
+    when use_error =>
+      perhaps_notify (warn, "Cannot create directory " & new_directory);
+  end create_directory_forgivingly;
+
   type environ_dir_filler is access procedure (argcount : in positive;
                                                arg      : cmdln_argfunc;
                                                warn     : in boolean);
@@ -270,12 +281,15 @@ procedure make_toolchain_environment is
               if exists (env_dir) then
                 perhaps_notify (warn, "Not overwriting " & env_dir);
               else
-                create_directory (env_dir);
+                create_directory_forgivingly (new_directory => env_dir,
+                                              warn => warn);
               end if;
-              do_quasi_copying (quasi_copy => quasi_copy,
-                                source_dir => src_dir,
-                                environ_dir => env_dir,
-                                warn => warn);
+              if exists (env_dir) then
+                do_quasi_copying (quasi_copy => quasi_copy,
+                                  source_dir => src_dir,
+                                  environ_dir => env_dir,
+                                  warn => warn);
+              end if;
             end;
           when others =>
             quasi_copy (source_name => full_name (f),
