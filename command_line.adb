@@ -38,6 +38,9 @@ package body command_line is
                             element_type => argument);
 
   showing_version : aliased boolean;
+  libraries_val   : aliased boolean;
+  regexp_val      : aliased gnat.strings.string_access;
+  verbose_val     : aliased boolean;
   arg_vector      : argument_vectors.vector;
 
   procedure prepare_command_line_configuration
@@ -46,19 +49,19 @@ package body command_line is
     define_switch (config => config,
                    switch => "-l",
                    long_switch => "--libraries",
-                   output => libraries'access,
+                   output => libraries_val'access,
                    help => "for shared libraries use linker " &
                            "scripts instead of symlinks");
     define_switch (config => config,
                    switch => "-e:",
                    long_switch => "--regexp=",
-                   output => regexp'access,
+                   output => regexp_val'access,
                    help => "specify a regular expression for " &
                            "--libraries (implies --libraries)");
     define_switch (config => config,
                    switch => "-v",
                    long_switch => "--verbose",
-                   output => verbose'access,
+                   output => verbose_val'access,
                    help => "when something unusual happens, " &
                            "display a message");
     define_switch (config => config,
@@ -127,6 +130,9 @@ package body command_line is
        bail_out := true;
        show_version;
     else
+      regexp := to_unbounded_string (regexp_val.all);
+      libraries := libraries_val;
+      verbose := verbose_val;
       collect_arguments;
     end if;
   exception

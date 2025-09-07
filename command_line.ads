@@ -16,17 +16,22 @@
 --  <https://www.gnu.org/licenses/>.
 --
 
-with gnat.strings;
+with ada.strings.unbounded;
 
 package command_line is
 
   -- This package may consume some heap space, but we do not bother to
   -- deallocate it.
 
+  use ada.strings.unbounded;
+
+  default_regexp : constant string :=
+                       "^.*(?<!plugins)/lib.+\.so(\.[0-9]+){0,3}$";
+
   bail_out  : boolean;
-  libraries : aliased boolean;
-  regexp    : aliased gnat.strings.string_access;
-  verbose   : aliased boolean;
+  libraries : boolean;
+  regexp    : unbounded_string;
+  verbose   : boolean;
 
   function arg_count
   return natural;
