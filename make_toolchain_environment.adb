@@ -66,28 +66,6 @@ procedure make_toolchain_environment is
     put (": ");
   end start_with_progname;
 
-------------------  procedure dispatch (args : arg_functions) is
-------------------    function operation
-------------------    return string is
-------------------    begin
-------------------      return arg (1);
-------------------    end operation;
-------------------  begin
-------------------    if argcount < 1 then
-------------------      usage_error;
-------------------    elsif operation = "symlinks+" then
-------------------      require_correct_dirs (do_symlinks'access, argcount, arg, true);
-------------------    elsif operation = "symlinks-" then
-------------------      require_correct_dirs (do_symlinks'access, argcount, arg, false);
-------------------    elsif operation = "libraries+" then
-------------------      require_correct_dirs (do_libraries'access, argcount, arg, true);
-------------------    elsif operation = "libraries-" then
-------------------      require_correct_dirs (do_libraries'access, argcount, arg, false);
-------------------    else
-------------------      usage_error;    
-------------------    end if;
-------------------  end dispatch;
-
   procedure suggest_help is
     use ada.text_io;
   begin
@@ -157,12 +135,24 @@ procedure make_toolchain_environment is
     end if;
   end check_args;
 
+  procedure dispatch is
+  begin
+    if command_line.libraries then
+      ----------------------------------------------------- FIXME: THIS NEEDS SUPPORT FOR THE ALTERNATIVE REGEXP.
+      quasi_copying.do_libraries (command_line.args,
+                                  command_line.verbose);
+    else
+      quasi_copying.do_symlinks (command_line.args,
+                                 command_line.verbose);
+    end if;
+  end dispatch;
+
 begin
   cmdln.set_exit_status (cmdln.success);
   interpret_the_command_line;
   if not bail_out then
     check_args;
------    dispatch;
+    dispatch;
   end if;
 end make_toolchain_environment;
 

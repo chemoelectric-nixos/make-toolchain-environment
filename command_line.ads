@@ -24,7 +24,6 @@ package command_line is
   -- deallocate it.
 
   bail_out  : boolean;
-  symlinks  : aliased boolean;
   libraries : aliased boolean;
   regexp    : aliased gnat.strings.string_access;
   verbose   : aliased boolean;
