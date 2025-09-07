@@ -17,7 +17,7 @@
 #
 
 AC_PREREQ([2.72])
-AC_INIT([Make Toolchain Environment],[1.0.0])
+AC_INIT([Make Toolchain Environment],[2.0.0])
 
 AC_CONFIG_SRCDIR([make_toolchain_environment.adb])
 
@@ -27,7 +27,7 @@ AC_CANONICAL_BUILD                 dnl On what platform are we compiling?
 AC_CANONICAL_HOST                  dnl For what platform are we compiling?
 AC_USE_SYSTEM_EXTENSIONS           dnl Define such macros as _GNU_SOURCE.
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([tar-pax no-dist-gzip dist-xz])
 AM_MAINTAINER_MODE
 LT_INIT
 
@@ -52,6 +52,12 @@ if test "${ac_cv_env_GNATMAKEFLAGS_set}" != set; then
    GNATMAKEFLAGS="-g -O2"
 fi
 
+AC_ARG_VAR([ASSERTION_POLICY],
+           [value of ‘pragma assertion_policy’ [default ‘check’]])
+if test "${ac_cv_env_ASSERTION_POLICY_set}" != set; then
+   ASSERTION_POLICY="check"
+fi
+
 # You can use ‘@GNU@’ to make GNU Make constructs unbothersome to
 # Automake. (By the way, you often can use ‘$(eval ...)’ as well, but
 # @GNU@ here may be better.)
@@ -59,6 +65,7 @@ AC_SUBST([GNU],[])
 
 StM_REQUIRE_GNU_MAKE_IN_PATH
 StM_CONFIG_MAKEFILES
+AC_CONFIG_FILES([gnat.adc])
 
 AC_OUTPUT
 

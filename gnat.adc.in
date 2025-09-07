@@ -1,0 +1,3 @@
+pragma ada_2022;
+pragma wide_character_encoding (utf8);
+pragma assertion_policy (@ASSERTION_POLICY@);

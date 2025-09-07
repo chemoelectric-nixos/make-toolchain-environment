@@ -54,12 +54,21 @@ GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 
 EXTRA_DIST += make_toolchain_environment.adb
+EXTRA_DIST += command_line.adb
+EXTRA_DIST += command_line.ads
+EXTRA_DIST += quasi_copying.adb
+EXTRA_DIST += quasi_copying.ads
+EXTRA_DIST += notification.adb
+EXTRA_DIST += notification.ads
 make_toolchain_environment_SOURCES += c_code.c
 AM_LDFLAGS += c_code.$(OBJEXT)
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
 make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
+					command_line.adb command_line.ads \
+					quasi_copying.adb quasi_copying.ads \
+					notification.adb notification.ads \
 					c_code.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
 
@@ -70,8 +79,8 @@ mte: $(srcdir)/Makefile.am
 	  echo 'exec "$${SCRIPT_DIR}"/make-toolchain-environment$(EXEEXT) "$$@"' ) \
 		> $(@) && chmod 755 $(@)
 
-MOSTLYCLEANFILES += make_toolchain_environment.{ali,$(OBJEXT)}
-MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads,ali,$(OBJEXT)}
+MOSTLYCLEANFILES += *.ali
+MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads}
 
 # local variables:
 # coding: utf-8
