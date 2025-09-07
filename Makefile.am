@@ -35,6 +35,7 @@ AM_LDFLAGS =
 LDADD =
 bin_PROGRAMS =
 bin_SCRIPTS =
+man_MANS =
 
 EXTRA_DIST += COPYING
 EXTRA_DIST += INSTALL
@@ -44,12 +45,14 @@ EXTRA_DIST += AUTHORS
 DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
 
-bin_PROGRAMS += make-toolchain-environment
+PROGNAME = make-toolchain-environment
+bin_PROGRAMS += $(PROGNAME)
 make_toolchain_environment_SOURCES =
 
 bin_SCRIPTS += mte
 DISTCLEANFILES += mte
 
+AM_GNATMAKEFLAGS += -I${builddir}
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 
@@ -69,6 +72,7 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					command_line.adb command_line.ads \
 					quasi_copying.adb quasi_copying.ads \
 					notification.adb notification.ads \
+					dist_version.ads \
 					c_code.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
 
@@ -76,11 +80,30 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 mte: $(srcdir)/Makefile.am
 	( echo '#!'$(SHELL); \
 	  echo 'SCRIPT_DIR="$$(dirname `readlink -f "$$0"`)"'; \
-	  echo 'exec "$${SCRIPT_DIR}"/make-toolchain-environment$(EXEEXT) "$$@"' ) \
+	  echo 'exec "$${SCRIPT_DIR}"/$(PROGNAME)$(EXEEXT) "$$@"' ) \
 		> $(@) && chmod 755 $(@)
+
+dist_version.ads: $(srcdir)/Makefile.am
+	( echo 'package dist_version is'; \
+	  echo '  progname : constant string := "$(PROGNAME)";'; \
+	  echo '  version  : constant string := "$(VERSION)";'; \
+	  echo 'end dist_version;' ) > $(@)
 
 MOSTLYCLEANFILES += *.ali
 MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads}
+CLEANFILES += dist_version.ads
+
+man_MANS += $(PROGNAME).1
+CLEANFILES += $(PROGNAME).1
+
+$(PROGNAME).1: $(PROGNAME)$(EXEEXT)
+	$(HELP2MAN) --section=1 --no-info ./$(PROGNAME)$(EXEEXT) -o $(@)
+
+install-data-hook:
+	(cd $(DESTDIR)/$(man1dir) && $(LN_S) $(PROGNAME).1 mte.1)
+
+uninstall-hook:
+	(cd $(DESTDIR)/$(man1dir) && rm -f mte.1)
 
 # local variables:
 # coding: utf-8

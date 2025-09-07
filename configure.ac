@@ -43,8 +43,13 @@ AC_PROG_AWK
 AC_PROG_SED
 AC_PROG_FGREP
 AC_PROG_EGREP
-
+AC_CHECK_PROGS([HELP2MAN],[help2man])
 AC_CHECK_PROGS([GNATMAKE],[gnatmake])
+
+if test -z "${HELP2MAN}"; then
+   AC_MSG_ERROR([Please install help2man. It is needed to make the manpage.])
+fi
+
 AC_ARG_VAR([GNATMAKE],[GNU gnatmake command])
 
 AC_ARG_VAR([GNATMAKEFLAGS],[GNU gnatmake flags [default: -g -O2]])
