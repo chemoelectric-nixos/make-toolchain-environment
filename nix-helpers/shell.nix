@@ -15,6 +15,9 @@ mkShell {
     autoreconfHook
     automake
     libtool
+    pkgconf
+    pcre2
+    pcre2.dev
   ];
 
   shellHook = ''
@@ -39,6 +42,8 @@ mkShell {
     export GNATBIND="gnatbind"
     export GNATLINK="gnatlink"
     export GNATMAKE="gnatmake"
+    export PKG_CONFIG="pkgconf"
+    export PKG_CONFIG_PATH="${pcre2.dev}/lib/pkgconfig"
 
   '';
 }

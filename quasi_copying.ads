@@ -16,26 +16,17 @@
 --  <https://www.gnu.org/licenses/>.
 --
 
+with command_line;
+
 package quasi_copying is
 
-  --
-  -- FIXME: THIS IS A CLUMSY WAY TO PASS ARGUMENTS.
-  -- FIXME: THIS IS A CLUMSY WAY TO PASS ARGUMENTS.
-  -- FIXME: THIS IS A CLUMSY WAY TO PASS ARGUMENTS.
-  -- FIXME: THIS IS A CLUMSY WAY TO PASS ARGUMENTS.
-  -- FIXME: THIS IS A CLUMSY WAY TO PASS ARGUMENTS.
-  -- FIXME: THIS IS A CLUMSY WAY TO PASS ARGUMENTS.
-  --
-  type cmdln_argfunc is
-    access function (number : in positive) return string;
+  use command_line;
 
-  procedure do_symlinks (argcount : in positive;
-                         arg      : cmdln_argfunc;
-                         warn     : in boolean);
+  procedure do_symlinks (args : arg_functions;
+                         warn : in boolean);
 
-  procedure do_libraries (argcount : in positive;
-                          arg      : cmdln_argfunc;
-                          warn     : in boolean);
+  procedure do_libraries (args : arg_functions;
+                          warn : in boolean);
 
 end quasi_copying;
 

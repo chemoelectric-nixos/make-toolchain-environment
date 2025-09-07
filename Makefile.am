@@ -22,8 +22,6 @@
 ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS =
 AUTOMAKE_OPTIONS += foreign
-AUTOMAKE_OPTIONS += subdir-objects
-#AUTOMAKE_OPTIONS += -Wno-portability
 
 EXTRA_DIST =
 MOSTLYCLEANFILES =
@@ -97,7 +95,7 @@ man_MANS += $(PROGNAME).1
 CLEANFILES += $(PROGNAME).1
 
 $(PROGNAME).1: $(PROGNAME)$(EXEEXT)
-	$(HELP2MAN) --section=1 --no-info ./$(PROGNAME)$(EXEEXT) -o $(@)
+	$(HELP2MAN) -o $(@) --section=1 --no-info $(builddir)/$(PROGNAME)$(EXEEXT)
 
 install-data-hook:
 	(cd $(DESTDIR)/$(man1dir) && $(LN_S) $(PROGNAME).1 mte.1)

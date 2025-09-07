@@ -45,6 +45,7 @@ AC_PROG_FGREP
 AC_PROG_EGREP
 AC_CHECK_PROGS([HELP2MAN],[help2man])
 AC_CHECK_PROGS([GNATMAKE],[gnatmake])
+PKG_PROG_PKG_CONFIG
 
 if test -z "${HELP2MAN}"; then
    AC_MSG_ERROR([Please install help2man. It is needed to make the manpage.])
@@ -62,6 +63,13 @@ AC_ARG_VAR([ASSERTION_POLICY],
 if test "${ac_cv_env_ASSERTION_POLICY_set}" != set; then
    ASSERTION_POLICY="check"
 fi
+
+PKG_CHECK_MODULES([PCRE2],[libpcre2-8],
+	[AC_DEFINE([HAVE_PCRE2],[1],[Define if pcre2 is found])],
+        [AC_MSG_ERROR([pcre2 is required but was not found.])])
+GNATMAKEFLAGS="${GNATMAKEFLAGS}${GNATMAKEFLAGS+ }${PCRE2_CFLAGS}"
+CPPFLAGS="${CPPFLAGS}${CPPFLAGS+ }${PCRE2_CFLAGS}"
+LDFLAGS="${LDFLAGS}${LDFLAGS+ }${PCRE2_LIBS}"
 
 # You can use ‘@GNU@’ to make GNU Make constructs unbothersome to
 # Automake. (By the way, you often can use ‘$(eval ...)’ as well, but

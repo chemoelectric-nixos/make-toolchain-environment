@@ -23,7 +23,6 @@ with ada.sequential_io;
 with ada.text_io;
 with interfaces.c;
 with interfaces.c.strings;
-with gnat.command_line;
 with gnat.regpat;
 
 with command_line;
@@ -35,16 +34,21 @@ procedure make_toolchain_environment is
   use quasi_copying;
 
   package cmdln renames ada.command_line;
-  package gcmdln renames gnat.command_line;
   package re renames gnat.regpat;
 
   c_io_error : exception;
 
   re_for_progname : constant re.pattern_matcher :=
-                             re.compile ("/([^/]*)$");
+                             re.compile ("/[^/]*$");
 
   re_for_absolute_path : constant re.pattern_matcher :=
                                   re.compile ("^/.*");
+
+  function path_name_is_absolute (path_name : in string)
+  return boolean is
+  begin
+    return re.match (re_for_absolute_path, path_name);
+  end path_name_is_absolute;
 
   progname : string := cmdln.command_name;
 
@@ -55,12 +59,6 @@ procedure make_toolchain_environment is
     put (progname (i .. progname'last));
   end put_progname;
 
-  function path_name_is_absolute (path_name : in string)
-  return boolean is
-  begin
-    return re.match (re_for_absolute_path, path_name);
-  end path_name_is_absolute;
-
   procedure start_with_progname is
     use ada.text_io;
   begin
@@ -68,56 +66,57 @@ procedure make_toolchain_environment is
     put (": ");
   end start_with_progname;
 
-  procedure inform_about_usage is
+------------------  procedure dispatch (args : arg_functions) is
+------------------    function operation
+------------------    return string is
+------------------    begin
+------------------      return arg (1);
+------------------    end operation;
+------------------  begin
+------------------    if argcount < 1 then
+------------------      usage_error;
+------------------    elsif operation = "symlinks+" then
+------------------      require_correct_dirs (do_symlinks'access, argcount, arg, true);
+------------------    elsif operation = "symlinks-" then
+------------------      require_correct_dirs (do_symlinks'access, argcount, arg, false);
+------------------    elsif operation = "libraries+" then
+------------------      require_correct_dirs (do_libraries'access, argcount, arg, true);
+------------------    elsif operation = "libraries-" then
+------------------      require_correct_dirs (do_libraries'access, argcount, arg, false);
+------------------    else
+------------------      usage_error;    
+------------------    end if;
+------------------  end dispatch;
+
+  procedure suggest_help is
     use ada.text_io;
   begin
-    put ("Usage: ");
+    put ("try """);
     put_progname;
-    put (" symlinks+ dir1 dir2 ... dirN environDir");
+    put (" --help"" for more information.");
     new_line;
-    put ("       ");
-    put_progname;
-    put (" symlinks- dir1 dir2 ... dirN environDir");
-    new_line;
-    put ("       ");
-    put_progname;
-    put (" libraries+ dir1 dir2 ... dirN environDir");
-    new_line;
-    put ("       ");
-    put_progname;
-    put (" libraries- dir1 dir2 ... dirN environDir");
-    new_line;
-  end inform_about_usage;
+  end suggest_help;
 
-  procedure usage_error is
-  begin
-    inform_about_usage;
-    cmdln.set_exit_status (cmdln.failure);
-  end usage_error;
+  procedure check_args is
 
-  type environ_dir_filler is access procedure (argcount : in positive;
-                                               arg      : cmdln_argfunc;
-                                               warn     : in boolean);
-
-  procedure require_correct_dirs (proc     : environ_dir_filler;
-                                  argcount : in natural;
-                                  arg      : cmdln_argfunc;
-                                  warn     : in boolean) is
     use ada.directories;
     use ada.text_io;
+    use command_line;
 
-    subtype source_dir_range is integer range 2 .. argcount - 1;
+    argcnt : constant natural := args.arg_count.all;
+
+    subtype source_dir_range is integer range 1 .. argcnt - 1;
 
     function source_dir (n : in source_dir_range)
     return string is
     begin
-      return arg (n);
+      return args.arg_string (n);
     end source_dir;
 
     function environ_dir
     return string is
     begin
-      return arg (argcount);
+      return args.arg_string (argcnt);
     end environ_dir;
 
     function source_dirs_are_all_absolute
@@ -127,9 +126,9 @@ procedure make_toolchain_environment is
       for i in source_dir_range loop
         if not path_name_is_absolute (source_dir (i)) then
           all_absolute := false;
-          put ("The source directory ");
+          put ("""");
           put (source_dir (i));
-          put (" must instead be an absolute path.");
+          put (""" must be an absolute path.");
           new_line;
         end if;
       end loop;
@@ -137,71 +136,33 @@ procedure make_toolchain_environment is
     end source_dirs_are_all_absolute;
 
   begin
-    if argcount < 2 then
+    if argcnt < 1 then
+      cmdln.set_exit_status (cmdln.failure);
       start_with_progname;
-      put ("You must specify some directories.");
+      put ("you must specify some directories.");
       new_line;
-      usage_error;
+      suggest_help;
     elsif not exists (environ_dir) or else
         kind (environ_dir) /= directory then
+      cmdln.set_exit_status (cmdln.failure);
       start_with_progname;
+      put ("""");
       put (environ_dir);
-      put (" is not a directory.");
+      put (""" is not a directory.");
       new_line;
-      usage_error;
+      suggest_help;
     elsif not source_dirs_are_all_absolute then
-      usage_error;
-    else
-      proc (argcount, arg, warn);
+      cmdln.set_exit_status (cmdln.failure);
+      suggest_help;
     end if;
-  end;
-
-  procedure dispatch (argcount : in natural;
-                      arg      : cmdln_argfunc) is
-    function operation
-    return string is
-    begin
-      return arg (1);
-    end operation;
-  begin
-    if argcount < 1 then
-      usage_error;
-    elsif operation = "symlinks+" then
-      require_correct_dirs (do_symlinks'access, argcount, arg, true);
-    elsif operation = "symlinks-" then
-      require_correct_dirs (do_symlinks'access, argcount, arg, false);
-    elsif operation = "libraries+" then
-      require_correct_dirs (do_libraries'access, argcount, arg, true);
-    elsif operation = "libraries-" then
-      require_correct_dirs (do_libraries'access, argcount, arg, false);
-    else
-      usage_error;    
-    end if;
-  end dispatch;
+  end check_args;
 
 begin
-----------  ada.text_io.put (regexp.all);
-----------  ada.text_io.new_line;
-----------  ada.text_io.put (cmdln.argument_count'image);ada.text_io.new_line;
-----------  declare
-----------    eoa : boolean := false;
-----------  begin
-----------    while not eoa loop
-----------      declare
-----------        s : constant string := gcmdln.get_argument (end_of_arguments => eoa);
-----------      begin
-----------        if not eoa then
-----------          ada.text_io.put (s);
-----------          ada.text_io.new_line;
-----------        end if;
-----------      end;
-----------    end loop;
-----------  end;
-
   cmdln.set_exit_status (cmdln.success);
   interpret_the_command_line;
   if not bail_out then
-    dispatch (cmdln.argument_count, cmdln.argument'access);
+    check_args;
+-----    dispatch;
   end if;
 end make_toolchain_environment;
 

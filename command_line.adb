@@ -17,6 +17,8 @@
 --
 
 with ada.command_line;
+with ada.containers.vectors;
+with ada.strings.unbounded;
 with ada.text_io;
 with gnat.command_line;
 with gnat.strings;
@@ -26,10 +28,17 @@ with dist_version;
 package body command_line is
 
   use ada.command_line;
+  use ada.strings.unbounded;
   use ada.text_io;
   use gnat.command_line;
 
+  subtype argument is ada.strings.unbounded.unbounded_string;
+  package argument_vectors is new
+    ada.containers.vectors (index_type => positive,
+                            element_type => argument);
+
   showing_version : aliased boolean;
+  arg_vector      : argument_vectors.vector;
 
   procedure prepare_command_line_configuration
             (config : in out command_line_configuration) is
@@ -38,7 +47,7 @@ package body command_line is
                    switch => "-l",
                    long_switch => "--libraries",
                    output => libraries'access,
-                   help => "for shared libraries, use linker " &
+                   help => "for shared libraries use linker " &
                            "scripts instead of symlinks");
     define_switch (config => config,
                    switch => "-e:",
@@ -82,6 +91,32 @@ package body command_line is
     new_line;
   end show_version;
 
+  function arg_count
+  return natural is
+  begin
+    return natural (arg_vector.length);
+  end arg_count;
+
+  function arg_string (number : in positive)
+  return string is
+  begin
+    return to_string (arg_vector (number));
+  end arg_string;
+
+  procedure collect_arguments is
+    eoa : boolean := false;
+  begin
+    while not eoa loop
+      declare
+        s : constant string := get_argument (end_of_arguments => eoa);
+      begin
+        if not eoa then
+          arg_vector.append (to_unbounded_string (s));
+        end if;
+      end;
+    end loop;
+  end collect_arguments;
+
   procedure interpret_the_command_line is
     config : command_line_configuration;
   begin
@@ -91,6 +126,8 @@ package body command_line is
     if showing_version then
        bail_out := true;
        show_version;
+    else
+      collect_arguments;
     end if;
   exception
     when exit_from_command_line =>

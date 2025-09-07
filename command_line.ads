@@ -20,11 +20,32 @@ with gnat.strings;
 
 package command_line is
 
+  -- This package may consume some heap space, but we do not bother to
+  -- deallocate it.
+
   bail_out  : boolean;
   symlinks  : aliased boolean;
   libraries : aliased boolean;
   regexp    : aliased gnat.strings.string_access;
   verbose   : aliased boolean;
+
+  function arg_count
+  return natural;
+
+  function arg_string (number : in positive)
+  return string
+  with pre => number <= arg_count;
+
+  type arg_functions is
+    record
+      arg_count  : access function return natural;
+      arg_string : access function (number : in positive)
+                   return string;
+    end record;
+
+  args : constant arg_functions :=
+                  ( arg_count => arg_count'access,
+                    arg_string => arg_string'access );
 
   procedure interpret_the_command_line;
 

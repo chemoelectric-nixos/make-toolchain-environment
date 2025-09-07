@@ -35,7 +35,8 @@ package body quasi_copying is
   c_io_error : exception;
 
   re_for_shared_library : constant re.pattern_matcher :=
-                      re.compile ("^.*/lib.+\.so(\.[0-9]+){0,3}$");
+--             re.compile ("^.*(?<!plugins)/lib.+\.so(\.[0-9]+){0,3}$");
+             re.compile ("^.*/lib.+\.so(\.[0-9]+){0,3}$");
 
   magic_bytes_count_for_ELF : constant integer range 4 .. 4 := 4;
   subtype magic_bytes_range_for_ELF is
@@ -229,26 +230,26 @@ package body quasi_copying is
   end do_quasi_copying;
 
   procedure do_quasi_copying (quasi_copy : quasi_copier;
-                              argcount   : in positive;
-                              arg        : cmdln_argfunc;
-                              warn       : in boolean)
-  with pre => (2 <= argcount) is
+                              args       : arg_functions;
+                              warn       : in boolean) is
 
     use ada.directories;
     use notification;
 
-    subtype source_dir_range is integer range 2 .. argcount - 1;
+    argcnt : constant natural := args.arg_count.all;
+
+    subtype source_dir_range is integer range 1 .. argcnt - 1;
 
     function source_dir (n : in source_dir_range)
     return string is
     begin
-      return arg (n);
+      return args.arg_string (n);
     end source_dir;
 
     function environ_dir
     return string is
     begin
-      return arg (argcount);
+      return args.arg_string (argcnt);
     end environ_dir;
 
   begin
@@ -266,20 +267,16 @@ package body quasi_copying is
     end loop;
   end do_quasi_copying;
 
-  procedure do_symlinks (argcount : in positive;
-                         arg      : cmdln_argfunc;
-                         warn     : in boolean) is
+  procedure do_symlinks (args : arg_functions;
+                         warn : in boolean) is
   begin
-    do_quasi_copying (make_symlink_no_clobber'access,
-                      argcount, arg, warn);
+    do_quasi_copying (make_symlink_no_clobber'access, args, warn);
   end do_symlinks;
 
-  procedure do_libraries (argcount : in positive;
-                          arg      : cmdln_argfunc;
-                          warn     : in boolean) is
+  procedure do_libraries (args : arg_functions;
+                          warn : in boolean) is
   begin
-    do_quasi_copying (make_linker_script_or_symlink'access,
-                      argcount, arg, warn);
+    do_quasi_copying (make_linker_script_or_symlink'access, args, warn);
   end do_libraries;
 
 end quasi_copying;
