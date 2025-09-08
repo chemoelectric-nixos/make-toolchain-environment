@@ -29,6 +29,7 @@ CLEANFILES =
 DISTCLEANFILES =
 BUILT_SOURCES =
 AM_GNATMAKEFLAGS =
+AM_CFLAGS =
 AM_LDFLAGS =
 LDADD =
 bin_PROGRAMS =
@@ -43,8 +44,7 @@ EXTRA_DIST += AUTHORS
 DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
 
-PROGNAME = make-toolchain-environment
-bin_PROGRAMS += $(PROGNAME)
+bin_PROGRAMS += make-toolchain-environment
 make_toolchain_environment_SOURCES =
 
 bin_SCRIPTS += mte
@@ -61,8 +61,8 @@ EXTRA_DIST += quasi_copying.adb
 EXTRA_DIST += quasi_copying.ads
 EXTRA_DIST += notification.adb
 EXTRA_DIST += notification.ads
-make_toolchain_environment_SOURCES += c_code.c
-AM_LDFLAGS += c_code.$(OBJEXT)
+make_toolchain_environment_SOURCES += EIO_value.c regexp.c
+AM_LDFLAGS += EIO_value.$(OBJEXT) regexp.$(OBJEXT)
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
@@ -71,8 +71,11 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					quasi_copying.adb quasi_copying.ads \
 					notification.adb notification.ads \
 					dist_version.ads \
-					c_code.$(OBJEXT)
-	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
+					EIO_value.$(OBJEXT) regexp.$(OBJEXT)
+	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) \
+		-cargs $(AM_CPPFLAGS) $(CPPFLAGS) $(XCPPFLAGS) \
+		       $(AM_CFLAGS) $(CFLAGS) $(XCFLAGS) \
+		-largs $(LDFLAGS_TOTAL)
 
 # Allow ‘mte’ as a shorthand for ‘make-toolchain-environment’.
 mte: $(srcdir)/Makefile.am
@@ -80,12 +83,6 @@ mte: $(srcdir)/Makefile.am
 	  echo 'SCRIPT_DIR="$$(dirname `readlink -f "$$0"`)"'; \
 	  echo 'exec "$${SCRIPT_DIR}"/$(PROGNAME)$(EXEEXT) "$$@"' ) \
 		> $(@) && chmod 755 $(@)
-
-dist_version.ads: $(srcdir)/Makefile.am
-	( echo 'package dist_version is'; \
-	  echo '  progname : constant string := "$(PROGNAME)";'; \
-	  echo '  version  : constant string := "$(VERSION)";'; \
-	  echo 'end dist_version;' ) > $(@)
 
 MOSTLYCLEANFILES += *.ali
 MOSTLYCLEANFILES += b~make_toolchain_environment.{adb,ads}

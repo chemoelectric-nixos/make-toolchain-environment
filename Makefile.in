@@ -109,10 +109,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1)
+bin_PROGRAMS = make-toolchain-environment$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_gnu_make.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
+	$(top_srcdir)/m4/ax_check_gnu_make.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/pkg.m4 \
@@ -127,13 +128,13 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = gnat.adc
+CONFIG_CLEAN_FILES = dist_version.ads gnat.adc
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = make-toolchain-environment$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_make_toolchain_environment_OBJECTS = c_code.$(OBJEXT)
+am_make_toolchain_environment_OBJECTS = EIO_value.$(OBJEXT) \
+	regexp.$(OBJEXT)
 make_toolchain_environment_OBJECTS =  \
 	$(am_make_toolchain_environment_OBJECTS)
 make_toolchain_environment_LDADD = $(LDADD)
@@ -184,7 +185,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/c_code.Po
+am__depfiles_remade = ./$(DEPDIR)/EIO_value.Po ./$(DEPDIR)/regexp.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -234,7 +235,8 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 AM_RECURSIVE_TARGETS = cscope
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/gnat.adc.in $(top_srcdir)/build-aux/compile \
+	$(srcdir)/dist_version.ads.in $(srcdir)/gnat.adc.in \
+	$(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
 	$(top_srcdir)/build-aux/config.sub \
 	$(top_srcdir)/build-aux/depcomp \
@@ -337,6 +339,7 @@ PCRE2_LIBS = @PCRE2_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PROGNAME = @PROGNAME@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -411,12 +414,12 @@ CLEANFILES = dist_version.ads $(PROGNAME).1
 DISTCLEANFILES = Makefile GNUmakefile mte
 BUILT_SOURCES = 
 AM_GNATMAKEFLAGS = -I${builddir}
-AM_LDFLAGS = c_code.$(OBJEXT)
+AM_CFLAGS = 
+AM_LDFLAGS = EIO_value.$(OBJEXT) regexp.$(OBJEXT)
 LDADD = 
 bin_SCRIPTS = mte
 man_MANS = $(PROGNAME).1
-PROGNAME = make-toolchain-environment
-make_toolchain_environment_SOURCES = c_code.c
+make_toolchain_environment_SOURCES = EIO_value.c regexp.c
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 all: $(BUILT_SOURCES) config.h
@@ -472,6 +475,8 @@ $(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+dist_version.ads: $(top_builddir)/config.status $(srcdir)/dist_version.ads.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 gnat.adc: $(top_builddir)/config.status $(srcdir)/gnat.adc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 install-binPROGRAMS: $(bin_PROGRAMS)
@@ -560,7 +565,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_code.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EIO_value.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/regexp.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -920,7 +926,8 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -f ./$(DEPDIR)/c_code.Po
+	-rm -f ./$(DEPDIR)/EIO_value.Po
+	-rm -f ./$(DEPDIR)/regexp.Po
 	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -969,7 +976,8 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -f ./$(DEPDIR)/c_code.Po
+	-rm -f ./$(DEPDIR)/EIO_value.Po
+	-rm -f ./$(DEPDIR)/regexp.Po
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1027,8 +1035,11 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					quasi_copying.adb quasi_copying.ads \
 					notification.adb notification.ads \
 					dist_version.ads \
-					c_code.$(OBJEXT)
-	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) -largs $(LDFLAGS_TOTAL)
+					EIO_value.$(OBJEXT) regexp.$(OBJEXT)
+	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) \
+		-cargs $(AM_CPPFLAGS) $(CPPFLAGS) $(XCPPFLAGS) \
+		       $(AM_CFLAGS) $(CFLAGS) $(XCFLAGS) \
+		-largs $(LDFLAGS_TOTAL)
 
 # Allow ‘mte’ as a shorthand for ‘make-toolchain-environment’.
 mte: $(srcdir)/Makefile.am
@@ -1036,12 +1047,6 @@ mte: $(srcdir)/Makefile.am
 	  echo 'SCRIPT_DIR="$$(dirname `readlink -f "$$0"`)"'; \
 	  echo 'exec "$${SCRIPT_DIR}"/$(PROGNAME)$(EXEEXT) "$$@"' ) \
 		> $(@) && chmod 755 $(@)
-
-dist_version.ads: $(srcdir)/Makefile.am
-	( echo 'package dist_version is'; \
-	  echo '  progname : constant string := "$(PROGNAME)";'; \
-	  echo '  version  : constant string := "$(VERSION)";'; \
-	  echo 'end dist_version;' ) > $(@)
 
 $(PROGNAME).1: $(PROGNAME)$(EXEEXT)
 	$(HELP2MAN) -o $(@) --section=1 --no-info $(builddir)/$(PROGNAME)$(EXEEXT)

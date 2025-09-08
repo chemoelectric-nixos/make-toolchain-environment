@@ -18,11 +18,9 @@
 
 with ada.command_line;
 with ada.directories;
-with ada.exceptions;
-with ada.sequential_io;
+with ada.strings.unbounded;
 with ada.text_io;
 with interfaces.c;
-with interfaces.c.strings;
 with gnat.regpat;
 
 with command_line;
@@ -35,8 +33,6 @@ procedure make_toolchain_environment is
 
   package cmdln renames ada.command_line;
   package re renames gnat.regpat;
-
-  c_io_error : exception;
 
   re_for_progname : constant re.pattern_matcher :=
                              re.compile ("/[^/]*$");
@@ -74,6 +70,45 @@ procedure make_toolchain_environment is
     put (" --help"" for more information.");
     new_line;
   end suggest_help;
+
+  procedure compile_regexp is
+    use ada.strings.unbounded;
+    use ada.text_io;
+    package c renames interfaces.c;
+    use c;
+
+    procedure compile_re_libraries
+                (re_string                   : in out c.char_array;
+                 re_string_length            : in c.size_t;
+                 error_indicator             : out c.int;
+                 error_message_buffer        : in out c.char_array;
+                 error_message_buffer_length : in c.size_t);
+    pragma import (c, compile_re_libraries, "compile_re_libraries");
+
+    regexp_str       : constant string := to_string (regexp);
+    regexp_len       : constant integer := length (regexp);
+    pattern_len      : size_t := c.size_t (regexp_len);
+    pattern          : c.char_array (1 .. c.size_t (pattern_len));
+    error_msg_buflen : size_t := c.size_t (1000);
+    error_msg        : c.char_array (1 .. error_msg_buflen);
+    error_indicator  : c.int;
+  begin
+    c.to_c (item => regexp_str, target => pattern,
+            count => pattern_len, append_nul => false);
+    compile_re_libraries (pattern, pattern_len,
+                          error_indicator,
+                          error_msg, error_msg_buflen);
+    if 0 <= error_indicator then
+      bail_out := true;
+      cmdln.set_exit_status (cmdln.failure);
+      start_with_progname;
+      put (to_ada (error_msg));
+      put (" at position");
+      put (error_indicator'image);
+      new_line;
+      suggest_help;
+    end if;
+  end compile_regexp;
 
   procedure check_args is
 
@@ -115,13 +150,19 @@ procedure make_toolchain_environment is
 
   begin
     if argcnt < 1 then
+      bail_out := true;
       cmdln.set_exit_status (cmdln.failure);
       start_with_progname;
       put ("you must specify some directories.");
       new_line;
       suggest_help;
+    elsif not source_dirs_are_all_absolute then
+      bail_out := true;
+      cmdln.set_exit_status (cmdln.failure);
+      suggest_help;
     elsif not exists (environ_dir) or else
         kind (environ_dir) /= directory then
+      bail_out := true;
       cmdln.set_exit_status (cmdln.failure);
       start_with_progname;
       put ("""");
@@ -129,16 +170,12 @@ procedure make_toolchain_environment is
       put (""" is not a directory.");
       new_line;
       suggest_help;
-    elsif not source_dirs_are_all_absolute then
-      cmdln.set_exit_status (cmdln.failure);
-      suggest_help;
     end if;
   end check_args;
 
   procedure dispatch is
   begin
     if command_line.libraries then
-      ----------------------------------------------------- FIXME: THIS NEEDS SUPPORT FOR THE ALTERNATIVE REGEXP.
       quasi_copying.do_libraries (command_line.args,
                                   command_line.verbose);
     else
@@ -150,8 +187,13 @@ procedure make_toolchain_environment is
 begin
   cmdln.set_exit_status (cmdln.success);
   interpret_the_command_line;
+  if libraries and not bail_out then
+    compile_regexp;
+  end if;
   if not bail_out then
     check_args;
+  end if;
+  if not bail_out then
     dispatch;
   end if;
 end make_toolchain_environment;

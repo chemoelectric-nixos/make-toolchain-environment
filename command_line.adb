@@ -56,8 +56,9 @@ package body command_line is
                    switch => "-e:",
                    long_switch => "--regexp=",
                    output => regexp_val'access,
-                   help => "specify a regular expression for " &
-                           "--libraries (implies --libraries)");
+                   help => "same as --libraries, but using the " &
+                           "given regular expression",
+                   argument => "'PATTERN'");
     define_switch (config => config,
                    switch => "-v",
                    long_switch => "--verbose",
@@ -121,6 +122,7 @@ package body command_line is
   end collect_arguments;
 
   procedure interpret_the_command_line is
+    use gnat.strings;
     config : command_line_configuration;
   begin
     bail_out := false;
@@ -130,8 +132,17 @@ package body command_line is
        bail_out := true;
        show_version;
     else
-      regexp := to_unbounded_string (regexp_val.all);
-      libraries := libraries_val;
+      if regexp_val /= null then
+        declare
+          regexp_str : string := regexp_val.all;
+        begin
+          regexp := to_unbounded_string (regexp_str);
+          libraries := true;
+        end;
+      else
+        regexp := to_unbounded_string (default_regexp);
+        libraries := libraries_val;
+      end if;
       verbose := verbose_val;
       collect_arguments;
     end if;

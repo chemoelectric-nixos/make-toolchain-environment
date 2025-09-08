@@ -656,6 +656,7 @@ LIBOBJS
 ifnGNUmake
 ifGNUmake
 GNU_MAKE
+PROGNAME
 GNU
 PCRE2_LIBS
 PCRE2_CFLAGS
@@ -14741,6 +14742,43 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=gnu23" >&5
+printf %s "checking whether the C compiler accepts -std=gnu23... " >&6; }
+if test ${ax_cv_check_cflags___std_gnu23+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$CFLAGS
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -std=gnu23 $add_gnu_werror"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+int main(){return 0;}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___std_gnu23=yes
+else case e in #(
+  e) ax_cv_check_cflags___std_gnu23=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_gnu23" >&5
+printf "%s\n" "$ax_cv_check_cflags___std_gnu23" >&6; }
+if test "x$ax_cv_check_cflags___std_gnu23" = xyes
+then :
+  CFLAGS="${CFLAGS}${CFLAGS+ }-std=gnu23"
+else case e in #(
+  e) : ;;
+esac
+fi
+
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ln -s works" >&5
 printf %s "checking whether ln -s works... " >&6; }
@@ -15397,6 +15435,10 @@ printf "%s\n" "#define PCRE2_CODE_UNIT_WIDTH 8" >>confdefs.h
 # @GNU@ here may be better.)
 
 
+# THE FOLLOWING MUST BE THE SAME NAME AS APPEARS IN bin_PROGRAMS.
+PROGNAME=make-toolchain-environment
+
+
 { :;
   { :;
 
@@ -15528,6 +15570,8 @@ printf "%s\n" "$as_me: WARNING: Please consider installing and using GNU Make:
    ac_config_files="$ac_config_files GNUmakefile:Makefile.in"
 
 }
+ac_config_files="$ac_config_files dist_version.ads"
+
 ac_config_files="$ac_config_files gnat.adc"
 
 
@@ -16563,6 +16607,7 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "GNUmakefile") CONFIG_FILES="$CONFIG_FILES GNUmakefile:Makefile.in" ;;
+    "dist_version.ads") CONFIG_FILES="$CONFIG_FILES dist_version.ads" ;;
     "gnat.adc") CONFIG_FILES="$CONFIG_FILES gnat.adc" ;;
 
   *) as_fn_error $? "invalid argument: '$ac_config_target'" "$LINENO" 5;;
