@@ -74,27 +74,26 @@ procedure make_toolchain_environment is
   procedure compile_regexp is
     use ada.strings.unbounded;
     use ada.text_io;
-    package c renames interfaces.c;
-    use c;
+    use interfaces.c;
 
     procedure compile_re_libraries
-                (re_string                   : in out c.char_array;
-                 re_string_length            : in c.size_t;
-                 error_indicator             : out c.int;
-                 error_message_buffer        : in out c.char_array;
-                 error_message_buffer_length : in c.size_t);
+                (re_string                   : in out char_array;
+                 re_string_length            : in size_t;
+                 error_indicator             : out int;
+                 error_message_buffer        : in out char_array;
+                 error_message_buffer_length : in size_t);
     pragma import (c, compile_re_libraries, "compile_re_libraries");
 
     regexp_str       : constant string := to_string (regexp);
     regexp_len       : constant integer := length (regexp);
-    pattern_len      : size_t := c.size_t (regexp_len);
-    pattern          : c.char_array (1 .. c.size_t (pattern_len));
-    error_msg_buflen : size_t := c.size_t (1000);
-    error_msg        : c.char_array (1 .. error_msg_buflen);
-    error_indicator  : c.int;
+    pattern_len      : size_t := size_t (regexp_len);
+    pattern          : char_array (1 .. pattern_len);
+    error_msg_buflen : size_t := size_t (1000);
+    error_msg        : char_array (1 .. error_msg_buflen);
+    error_indicator  : int;
   begin
-    c.to_c (item => regexp_str, target => pattern,
-            count => pattern_len, append_nul => false);
+    to_c (item => regexp_str, target => pattern,
+          count => pattern_len, append_nul => false);
     compile_re_libraries (pattern, pattern_len,
                           error_indicator,
                           error_msg, error_msg_buflen);

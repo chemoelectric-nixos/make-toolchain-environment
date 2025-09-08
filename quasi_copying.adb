@@ -22,21 +22,14 @@ with ada.sequential_io;
 with ada.text_io;
 with interfaces.c;
 with interfaces.c.strings;
-with gnat.regpat;
 with notification;
 
 package body quasi_copying is
-
-  package re renames gnat.regpat;
 
   package character_io is new ada.sequential_io (character);
   package char_io renames character_io;
 
   c_io_error : exception;
-
-  re_for_shared_library : constant re.pattern_matcher :=
---             re.compile ("^.*(?<!plugins)/lib.+\.so(\.[0-9]+){0,3}$");
-             re.compile ("^.*/lib.+\.so(\.[0-9]+){0,3}$");
 
   magic_bytes_count_for_ELF : constant integer range 4 .. 4 := 4;
   subtype magic_bytes_range_for_ELF is
@@ -49,8 +42,22 @@ package body quasi_copying is
 
   function path_name_is_shared_library (path_name : in string)
   return boolean is
+    use interfaces.c;
+
+    function match_re_libraries (path_string        : in out char_array;
+                                 path_string_length : in size_t)
+    return int;
+    pragma import (c, match_re_libraries, "match_re_libraries");
+
+    path_len  : constant natural := path_name'length;
+    len       : size_t := size_t (path_len);
+    str       : char_array (1 .. len);
+    match_val : int;
   begin
-    return re.match (re_for_shared_library, path_name);
+    to_c (item => path_name, target => str, count => len,
+          append_nul => false);
+    match_val := match_re_libraries (str, len);
+    return (0 <= match_val);
   end path_name_is_shared_library;
 
   function file_seems_to_be_ELF (file : char_io.file_type)

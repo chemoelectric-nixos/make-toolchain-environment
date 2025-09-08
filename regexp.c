@@ -21,9 +21,16 @@
 #include <config.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <pcre2.h>
 
-PCRE2_UCHAR *re_string_copy;
+void
+xalloc_die (void)
+{
+  printf ("memory exhausted\n");
+  abort ();
+}
+
 pcre2_code *re_libraries;
 
 void
@@ -51,4 +58,21 @@ compile_re_libraries (char *re_string, size_t re_string_length,
       (void) pcre2_get_error_message (errorcode, errmsg_buf,
 				      error_message_buffer_length);
     }
+}
+
+int
+match_re_libraries (char *path_string, size_t path_string_length)
+{
+  PCRE2_SPTR path_str = (PCRE2_SPTR) path_string;
+  pcre2_match_context *match_context =
+    pcre2_match_context_create (NULL);
+  pcre2_match_data *match_data = pcre2_match_data_create (0, NULL);
+  if (match_data == NULL)
+    xalloc_die ();
+  uint32_t options = PCRE2_NO_UTF_CHECK;
+  int retval = pcre2_match (re_libraries, path_str, path_string_length,
+			    0, options, match_data, match_context);
+  pcre2_match_data_free (match_data);
+  pcre2_match_context_free (match_context);
+  return retval;
 }
