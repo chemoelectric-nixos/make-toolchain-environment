@@ -37,16 +37,18 @@ compile_re_libraries (char *re_string, size_t re_string_length,
   int errorcode;
   PCRE2_SIZE erroroffset;
 
+  PCRE2_SPTR re_str = (PCRE2_SPTR) re_string;
+
   const uint32_t options =
-    PCRE2_UTF | PCRE2_UCP | PCRE2_NO_UTF_CHECK | PCRE2_MATCH_INVALID_UTF;
-  re_libraries = pcre2_compile ((PCRE2_SPTR) re_string, re_string_length,
-				options, &errorcode, &erroroffset, NULL);
-  re_libraries = NULL;
+    PCRE2_UTF | PCRE2_UCP | PCRE2_NO_UTF_CHECK |
+    PCRE2_MATCH_INVALID_UTF;
+  re_libraries = pcre2_compile (re_str, re_string_length, options,
+				&errorcode, &erroroffset, NULL);
   if (re_libraries == NULL)
     {
       *error_indicator = (int) erroroffset;
-      (void) pcre2_get_error_message (errorcode,
-				      (PCRE2_UCHAR *) error_message_buffer,
+      PCRE2_UCHAR *errmsg_buf = (PCRE2_UCHAR *) error_message_buffer;
+      (void) pcre2_get_error_message (errorcode, errmsg_buf,
 				      error_message_buffer_length);
     }
 }

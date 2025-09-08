@@ -1,0 +1,2 @@
+--gnu-style
+--line-length 72
