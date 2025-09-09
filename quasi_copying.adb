@@ -46,8 +46,10 @@ package body quasi_copying is
 
     function match_re_libraries (path_string        : in out char_array;
                                  path_string_length : in size_t)
-    return int;
-    pragma import (c, match_re_libraries, "match_re_libraries");
+    return int
+    with import => true,
+         convention => c,
+         external_name => "match_re_libraries";
 
     path_len  : constant natural := path_name'length;
     len       : size_t := size_t (path_len);
@@ -107,12 +109,16 @@ package body quasi_copying is
 
     function symlink (source_p : in chars_ptr;
                       target_p : in chars_ptr)
-    return int;
-    pragma import (c, symlink, "symlink");
+    return int
+    with import => true,
+         convention => c,
+         external_name => "symlink";
 
     function EIO_value
-    return int;
-    pragma import (c, EIO_value, "EIO_value");
+    return int
+    with import => true,
+         convention => c,
+         external_name => "EIO_value";
 
     source_ptr : chars_ptr;
     target_ptr : chars_ptr;

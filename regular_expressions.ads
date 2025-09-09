@@ -35,8 +35,8 @@ package regular_expressions is
   function re_match (re   : in re_code;
                      item : in string)
   return integer
-  with post => (-1 <= re_match'result and
-                re_match'result <= item'length);
+  with post => (item'first - 1 <= re_match'result and
+                re_match'result <= item'last + 1);
 
 private
 

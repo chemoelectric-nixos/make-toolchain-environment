@@ -21,7 +21,7 @@ with ada.directories;
 with ada.strings.unbounded;
 with ada.text_io;
 with interfaces.c;
-with gnat.regpat;
+with gnat.regpat; ------------------------------------------------------------------------------------------------
 
 with command_line;
 with quasi_copying;
@@ -31,12 +31,15 @@ procedure make_toolchain_environment is
 
   use command_line;
   use quasi_copying;
+  use regular_expressions;
 
   package cmdln renames ada.command_line;
-  package re renames gnat.regpat;
+  package re renames gnat.regpat; ---------------------------------------------------------------------------------
 
-  re_for_progname : constant re.pattern_matcher :=
-                             re.compile ("/[^/]*$");
+  re_for_progname : re_code;
+
+-----------  re_for_progname : constant re.pattern_matcher :=
+-----------                             re.compile ("/[^/]*$");
 
   re_for_absolute_path : constant re.pattern_matcher :=
                                   re.compile ("^/.*");
@@ -51,7 +54,8 @@ procedure make_toolchain_environment is
 
   procedure put_progname is
     use ada.text_io;
-    i : constant natural := re.match (re_for_progname, progname, 1) + 1;
+----------    i : constant natural := re.match (re_for_progname, progname, 1) + 1;
+    i : constant natural := re_match (re_for_progname, progname) + 1;
   begin
     put (progname (i .. progname'last));
   end put_progname;
@@ -184,8 +188,19 @@ procedure make_toolchain_environment is
     end if;
   end dispatch;
 
+  procedure compile_regular_expressions is
+    use ada.strings.unbounded;
+    error_indicator      : integer;
+    error_message_buffer : unbounded_string;
+  begin
+    re_compile ("/[^/]*$", error_indicator, error_message_buffer,
+                re_for_progname);
+    pragma assert (check => (error_indicator < 0));
+  end compile_regular_expressions;
+
 begin
   cmdln.set_exit_status (cmdln.success);
+  compile_regular_expressions;
   interpret_the_command_line;
   if libraries and not bail_out then
     compile_regexp;

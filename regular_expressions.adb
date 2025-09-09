@@ -62,7 +62,7 @@ package body regular_expressions is
     to_c (item => item, target => str, count => len,
           append_nul => false);
     i := re_match (re, str, len);
-    return integer (i);
+    return integer (i) + item'first;
   end re_match;
 
 end regular_expressions;
