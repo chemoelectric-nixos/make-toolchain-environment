@@ -65,6 +65,13 @@ package body regular_expressions is
     return integer (i) + item'first;
   end re_match;
 
+  function re_match (re   : in re_code;
+                     item : in string)
+  return boolean is
+  begin
+    return (item'first <= re_match (re, item));
+  end re_match;
+
 end regular_expressions;
 
 -- Local Variables:

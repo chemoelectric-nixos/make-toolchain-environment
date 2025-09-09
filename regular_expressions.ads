@@ -38,6 +38,10 @@ package regular_expressions is
   with post => (item'first - 1 <= re_match'result and
                 re_match'result <= item'last + 1);
 
+  function re_match (re   : in re_code;
+                     item : in string)
+  return boolean;
+
 private
 
   type re_code_internals is null record;
