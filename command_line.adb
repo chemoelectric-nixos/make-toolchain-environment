@@ -37,9 +37,14 @@ package body command_line is
     ada.containers.vectors (index_type => positive,
                             element_type => argument);
 
+  NUL : constant character := character'val (0);
+  subtype regexp_phony_range is integer range 1 .. 23;
+  regexp_phony : constant string := string'(regexp_phony_range => NUL);
+
   showing_version : aliased boolean;
   libraries_val   : aliased boolean;
-  regexp_val      : aliased gnat.strings.string_access;
+  regexp_val      : aliased gnat.strings.string_access :=
+                      new string'(regexp_phony_range => NUL);
   verbose_val     : aliased boolean;
   arg_vector      : argument_vectors.vector;
 
@@ -132,7 +137,7 @@ package body command_line is
        bail_out := true;
        show_version;
     else
-      if regexp_val /= null and then regexp_val.all /= "" then
+      if regexp_val.all /= regexp_phony then
         declare
           regexp_str : string := regexp_val.all;
         begin
