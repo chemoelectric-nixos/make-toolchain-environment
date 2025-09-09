@@ -46,7 +46,7 @@ compile_re_libraries (char *re_string, size_t re_string_length,
 
   PCRE2_SPTR re_str = (PCRE2_SPTR) re_string;
 
-  const uint32_t options = 0;
+  const uint32_t options = PCRE2_UCP | PCRE2_UTF;
   re_libraries =
     pcre2_compile (re_str, re_string_length, options, &errorcode,
 		   &erroroffset, NULL);
@@ -69,9 +69,21 @@ match_re_libraries (char *path_string, size_t path_string_length)
   if (match_data == NULL)
     xalloc_die ();
   uint32_t options = 0;
-  int retval = pcre2_match (re_libraries, path_str, path_string_length,
-			    0, options, match_data, match_context);
+  int match_val = pcre2_match (re_libraries, path_str, path_string_length,
+			       0, options, match_data, match_context);
+  int index;
+  if (match_val < 0)
+    {
+      /* Ignore matching errors. Treat them as non-matches and return
+	 -1. FIXME/TODO: raise matching errors as Ada exceptions. */
+      index = -1;
+    }
+  else
+    {
+      PCRE2_SIZE *ovector = pcre2_get_ovector_pointer (match_data);
+      index = (int) ovector[0];
+    }
   pcre2_match_data_free (match_data);
   pcre2_match_context_free (match_context);
-  return retval;
+  return index;
 }
