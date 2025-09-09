@@ -17,15 +17,16 @@
 --
 
 with command_line;
+with regular_expressions;
 
 package quasi_copying is
 
-  use command_line;
+  re_for_libraries : regular_expressions.re_code;
 
-  procedure do_symlinks (args : arg_functions;
+  procedure do_symlinks (args : command_line.arg_functions;
                          warn : in boolean);
 
-  procedure do_libraries (args : arg_functions;
+  procedure do_libraries (args : command_line.arg_functions;
                           warn : in boolean);
 
 end quasi_copying;

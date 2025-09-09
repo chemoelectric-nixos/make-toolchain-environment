@@ -20,7 +20,6 @@ with ada.command_line;
 with ada.directories;
 with ada.strings.unbounded;
 with ada.text_io;
-with interfaces.c;
 
 with command_line;
 with quasi_copying;
@@ -67,44 +66,6 @@ procedure make_toolchain_environment is
     put (" --help"" for more information.");
     new_line;
   end suggest_help;
-
-  procedure compile_regexp is
-    use ada.strings.unbounded;
-    use ada.text_io;
-    use interfaces.c;
-
-    procedure compile_re_libraries
-                (re_string                   : in out char_array;
-                 re_string_length            : in size_t;
-                 error_indicator             : out int;
-                 error_message_buffer        : in out char_array;
-                 error_message_buffer_length : in size_t);
-    pragma import (c, compile_re_libraries, "compile_re_libraries");
-
-    regexp_str       : constant string := to_string (regexp);
-    regexp_len       : constant integer := length (regexp);
-    pattern_len      : size_t := size_t (regexp_len);
-    pattern          : char_array (1 .. pattern_len);
-    error_msg_buflen : size_t := size_t (1000);
-    error_msg        : char_array (1 .. error_msg_buflen);
-    error_indicator  : int;
-  begin
-    to_c (item => regexp_str, target => pattern,
-          count => pattern_len, append_nul => false);
-    compile_re_libraries (pattern, pattern_len,
-                          error_indicator,
-                          error_msg, error_msg_buflen);
-    if 0 <= error_indicator then
-      bail_out := true;
-      cmdln.set_exit_status (cmdln.failure);
-      start_with_progname;
-      put (to_ada (error_msg));
-      put (" at position");
-      put (error_indicator'image);
-      new_line;
-      suggest_help;
-    end if;
-  end compile_regexp;
 
   procedure check_args is
 
@@ -180,7 +141,7 @@ procedure make_toolchain_environment is
     end if;
   end dispatch;
 
-  procedure compile_regular_expressions is
+  procedure compile_first_regular_expressions is
     use ada.strings.unbounded;
     error_indicator      : integer;
     error_message_buffer : unbounded_string;
@@ -191,15 +152,35 @@ procedure make_toolchain_environment is
     re_compile ("^/", error_indicator, error_message_buffer,
                 re_for_absolute_path);
     pragma assert (check => (error_indicator < 0));
-  end compile_regular_expressions;
+  end compile_first_regular_expressions;
+
+  procedure compile_second_regular_expressions is
+    use ada.strings.unbounded;
+    use ada.text_io;
+    error_indicator      : integer;
+    error_message_buffer : unbounded_string;
+  begin
+    if libraries and not bail_out then
+      re_compile (to_string (regexp), error_indicator,
+                  error_message_buffer, re_for_libraries);
+      if 0 <= error_indicator then
+        bail_out := true;
+        cmdln.set_exit_status (cmdln.failure);
+        start_with_progname;
+        put (to_string (error_message_buffer));
+        put (" at position");
+        put (error_indicator'image);
+        new_line;
+        suggest_help;
+      end if;
+    end if;
+  end compile_second_regular_expressions;
 
 begin
   cmdln.set_exit_status (cmdln.success);
-  compile_regular_expressions;
+  compile_first_regular_expressions;
   interpret_the_command_line;
-  if libraries and not bail_out then
-    compile_regexp;
-  end if;
+  compile_second_regular_expressions;
   if not bail_out then
     check_args;
   end if;

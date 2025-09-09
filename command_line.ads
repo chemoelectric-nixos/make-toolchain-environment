@@ -20,9 +20,6 @@ with ada.strings.unbounded;
 
 package command_line is
 
-  -- This package may consume some heap space, but we do not bother to
-  -- deallocate it.
-
   use ada.strings.unbounded;
 
   default_regexp : constant string := "/lib.+\.so(\.[0-9]+){0,3}$";

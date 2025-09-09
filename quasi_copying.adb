@@ -22,14 +22,24 @@ with ada.sequential_io;
 with ada.text_io;
 with interfaces.c;
 with interfaces.c.strings;
+
 with notification;
+with regular_expressions;
 
 package body quasi_copying is
+
+  c_io_error : exception;
 
   package character_io is new ada.sequential_io (character);
   package char_io renames character_io;
 
-  c_io_error : exception;
+
+  function path_name_is_shared_library (path_name : in string)
+  return boolean is
+    use regular_expressions;
+  begin
+    return re_match (re_for_libraries, path_name);
+  end path_name_is_shared_library;
 
   magic_bytes_count_for_ELF : constant integer range 4 .. 4 := 4;
   subtype magic_bytes_range_for_ELF is
@@ -39,28 +49,6 @@ package body quasi_copying is
                                               character'val (16#45#),
                                               character'val (16#4c#),
                                               character'val (16#46#) );
-
-  function path_name_is_shared_library (path_name : in string)
-  return boolean is
-    use interfaces.c;
-
-    function match_re_libraries (path_string        : in out char_array;
-                                 path_string_length : in size_t)
-    return int
-    with import => true,
-         convention => c,
-         external_name => "match_re_libraries";
-
-    path_len  : constant natural := path_name'length;
-    len       : size_t := size_t (path_len);
-    str       : char_array (1 .. len);
-    match_val : int;
-  begin
-    to_c (item => path_name, target => str, count => len,
-          append_nul => false);
-    match_val := match_re_libraries (str, len);
-    return (0 <= match_val);
-  end path_name_is_shared_library;
 
   function file_seems_to_be_ELF (file : char_io.file_type)
   return boolean is
@@ -243,10 +231,11 @@ package body quasi_copying is
   end do_quasi_copying;
 
   procedure do_quasi_copying (quasi_copy : quasi_copier;
-                              args       : arg_functions;
+                              args       : command_line.arg_functions;
                               warn       : in boolean) is
 
     use ada.directories;
+    use command_line;
     use notification;
 
     argcnt : constant natural := args.arg_count.all;
@@ -280,13 +269,13 @@ package body quasi_copying is
     end loop;
   end do_quasi_copying;
 
-  procedure do_symlinks (args : arg_functions;
+  procedure do_symlinks (args : command_line.arg_functions;
                          warn : in boolean) is
   begin
     do_quasi_copying (make_symlink_no_clobber'access, args, warn);
   end do_symlinks;
 
-  procedure do_libraries (args : arg_functions;
+  procedure do_libraries (args : command_line.arg_functions;
                           warn : in boolean) is
   begin
     do_quasi_copying (make_linker_script_or_symlink'access, args, warn);
