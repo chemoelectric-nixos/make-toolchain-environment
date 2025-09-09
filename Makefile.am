@@ -61,8 +61,10 @@ EXTRA_DIST += quasi_copying.adb
 EXTRA_DIST += quasi_copying.ads
 EXTRA_DIST += notification.adb
 EXTRA_DIST += notification.ads
-make_toolchain_environment_SOURCES += EIO_value.c regexp.c
-AM_LDFLAGS += EIO_value.$(OBJEXT) regexp.$(OBJEXT)
+EXTRA_DIST += regular_expressions.adb
+EXTRA_DIST += regular_expressions.ads
+make_toolchain_environment_SOURCES += EIO_value.c regexp_pcre2.c
+AM_LDFLAGS += EIO_value.$(OBJEXT) regexp_pcre2.$(OBJEXT)
 
 # The following rule produces more files than just the GNU Make
 # target, but gnatmake manages those files.
@@ -70,8 +72,11 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					command_line.adb command_line.ads \
 					quasi_copying.adb quasi_copying.ads \
 					notification.adb notification.ads \
+					regular_expressions.adb \
+					regular_expressions.ads \
 					dist_version.ads \
-					EIO_value.$(OBJEXT) regexp.$(OBJEXT)
+					EIO_value.$(OBJEXT) \
+					regexp_pcre2.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) \
 		-cargs $(AM_CPPFLAGS) $(CPPFLAGS) $(XCPPFLAGS) \
 		       $(AM_CFLAGS) $(CFLAGS) $(XCFLAGS) \

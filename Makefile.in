@@ -134,7 +134,7 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_make_toolchain_environment_OBJECTS = EIO_value.$(OBJEXT) \
-	regexp.$(OBJEXT)
+	regexp_pcre2.$(OBJEXT)
 make_toolchain_environment_OBJECTS =  \
 	$(am_make_toolchain_environment_OBJECTS)
 make_toolchain_environment_LDADD = $(LDADD)
@@ -185,7 +185,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/EIO_value.Po ./$(DEPDIR)/regexp.Po
+am__depfiles_remade = ./$(DEPDIR)/EIO_value.Po \
+	./$(DEPDIR)/regexp_pcre2.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -408,18 +409,19 @@ AUTOMAKE_OPTIONS = foreign
 EXTRA_DIST = COPYING INSTALL README AUTHORS \
 	make_toolchain_environment.adb command_line.adb \
 	command_line.ads quasi_copying.adb quasi_copying.ads \
-	notification.adb notification.ads
+	notification.adb notification.ads regular_expressions.adb \
+	regular_expressions.ads
 MOSTLYCLEANFILES = *.ali b~make_toolchain_environment.{adb,ads}
 CLEANFILES = dist_version.ads $(PROGNAME).1
 DISTCLEANFILES = Makefile GNUmakefile mte
 BUILT_SOURCES = 
 AM_GNATMAKEFLAGS = -I${builddir}
 AM_CFLAGS = 
-AM_LDFLAGS = EIO_value.$(OBJEXT) regexp.$(OBJEXT)
+AM_LDFLAGS = EIO_value.$(OBJEXT) regexp_pcre2.$(OBJEXT)
 LDADD = 
 bin_SCRIPTS = mte
 man_MANS = $(PROGNAME).1
-make_toolchain_environment_SOURCES = EIO_value.c regexp.c
+make_toolchain_environment_SOURCES = EIO_value.c regexp_pcre2.c
 GNATMAKEFLAGS_TOTAL = $(AM_GNATMAKEFLAGS) $(GNATMAKEFLAGS) $(XGNATMAKEFLAGS)
 LDFLAGS_TOTAL = $(AM_LDFLAGS) $(LDFLAGS) $(XLDFLAGS)
 all: $(BUILT_SOURCES) config.h
@@ -566,7 +568,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EIO_value.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/regexp.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/regexp_pcre2.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -927,7 +929,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f ./$(DEPDIR)/EIO_value.Po
-	-rm -f ./$(DEPDIR)/regexp.Po
+	-rm -f ./$(DEPDIR)/regexp_pcre2.Po
 	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -977,7 +979,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
 	-rm -f ./$(DEPDIR)/EIO_value.Po
-	-rm -f ./$(DEPDIR)/regexp.Po
+	-rm -f ./$(DEPDIR)/regexp_pcre2.Po
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1034,8 +1036,11 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					command_line.adb command_line.ads \
 					quasi_copying.adb quasi_copying.ads \
 					notification.adb notification.ads \
+					regular_expressions.adb \
+					regular_expressions.ads \
 					dist_version.ads \
-					EIO_value.$(OBJEXT) regexp.$(OBJEXT)
+					EIO_value.$(OBJEXT) \
+					regexp_pcre2.$(OBJEXT)
 	$(GNATMAKE) -o $(@) $(GNATMAKEFLAGS_TOTAL) $(<) \
 		-cargs $(AM_CPPFLAGS) $(CPPFLAGS) $(XCPPFLAGS) \
 		       $(AM_CFLAGS) $(CFLAGS) $(XCFLAGS) \

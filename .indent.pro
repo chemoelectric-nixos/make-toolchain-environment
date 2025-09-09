@@ -1,2 +1,3 @@
 --gnu-style
 --line-length 72
+--no-tabs

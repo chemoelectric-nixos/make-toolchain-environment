@@ -25,6 +25,7 @@ with gnat.regpat;
 
 with command_line;
 with quasi_copying;
+with regular_expressions;
 
 procedure make_toolchain_environment is
 
