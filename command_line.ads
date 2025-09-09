@@ -25,8 +25,7 @@ package command_line is
 
   use ada.strings.unbounded;
 
-  default_regexp : constant string :=
-                       "^.*(?<!plugins)/lib.+\.so(\.[0-9]+){0,3}$";
+  default_regexp : constant string := "/lib.+\.so(\.[0-9]+){0,3}$";
 
   bail_out  : boolean;
   libraries : boolean;

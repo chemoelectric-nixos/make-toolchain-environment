@@ -132,7 +132,7 @@ package body command_line is
        bail_out := true;
        show_version;
     else
-      if regexp_val /= null then
+      if regexp_val /= null and then regexp_val.all /= "" then
         declare
           regexp_str : string := regexp_val.all;
         begin
