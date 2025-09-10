@@ -17,7 +17,7 @@
 #
 
 AC_PREREQ([2.72])
-AC_INIT([Make Toolchain Environment],[2.0.0])
+AC_INIT([Make Toolchain Environment],[2.0.1])
 AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_SRCDIR([make_toolchain_environment.adb])

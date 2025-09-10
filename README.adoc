@@ -1,0 +1,51 @@
+== NAME
+
+make-toolchain-environment - manual page for make-toolchain-environment
+2.0.0
+
+== SYNOPSIS
+
+*make-toolchain-environment* [_switches_] [_arguments_]
+
+== DESCRIPTION
+
+*-l*, *--libraries*::
+  for shared libraries use linker scripts instead of symlinks
+
+*-e*, *--regexp=*'PATTERN' same as *--libraries*, but using the given
+regular expression
+
+*-v*, *--verbose*::
+  when something unusual happens, display a message
+*-h*, *--help*::
+  display this help, then exit
+*--version*::
+  output version information, then exit
+
+You may use the short name "mte" instead of
+"make-toolchain-environment".
+
+The arguments are a list of directories, the last of which is where part
+of an "environment" is to be constructed. All the other directories must
+be absolute paths.
+
+Patterns for the *--regexp* option must be in Unicode PCRE2 format. The
+default pattern, used by the *--libraries* option, is
+
+____
+'^(/(?!plugins/)[^/]*)*/lib[^/]+\.so(\.[0-9]+)\{0,3}$'
+____
+
+ELF files whose paths satisfy the regular expression will be "copied" as
+linker scripts instead of as symlinks.
+
+== AUTHOR
+
+Written by Barry Schwartz.
+
+== COPYRIGHT
+
+Copyright © 2025 Barry Schwartz License GPLv3+: GNU GPL version 3 or
+later <https://gnu.org/licenses/gpl.html>. +
+This is free software: you are free to change and redistribute it. There
+is NO WARRANTY, to the extent permitted by law.
