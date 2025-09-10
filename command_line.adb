@@ -169,7 +169,7 @@ package body command_line is
       new_line;
       put ("be absolute paths.");
       new_line (2);
-      put ("Patterns for the --regexp option must be in Unicode PCRE2 " &
+      put ("Patterns for the --regexp switch must be in Unicode PCRE2 " &
            "format.");
       new_line;
       put ("The default pattern, used by the --libraries option, is");
