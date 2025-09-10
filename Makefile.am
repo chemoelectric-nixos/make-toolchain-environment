@@ -38,7 +38,7 @@ man_MANS =
 
 EXTRA_DIST += COPYING
 EXTRA_DIST += INSTALL
-EXTRA_DIST += README
+EXTRA_DIST += README.adoc
 EXTRA_DIST += AUTHORS
 
 DISTCLEANFILES += Makefile
@@ -105,6 +105,11 @@ install-data-hook:
 
 uninstall-hook:
 	(cd $(DESTDIR)/$(man1dir) && rm -f mte.1)
+
+# The following rule is for the maintainer.
+update-README: $(PROGNAME).1
+	pandoc $(PROGNAME).1 -o ${srcdir}/README.adoc
+.PHONY: update-README
 
 # local variables:
 # coding: utf-8

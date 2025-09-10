@@ -245,7 +245,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/build-aux/depcomp \
 	$(top_srcdir)/build-aux/install-sh \
 	$(top_srcdir)/build-aux/ltmain.sh \
-	$(top_srcdir)/build-aux/missing AUTHORS COPYING INSTALL README \
+	$(top_srcdir)/build-aux/missing AUTHORS COPYING INSTALL \
 	build-aux/compile build-aux/config.guess build-aux/config.sub \
 	build-aux/depcomp build-aux/install-sh build-aux/ltmain.sh \
 	build-aux/missing
@@ -409,7 +409,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS = foreign
-EXTRA_DIST = COPYING INSTALL README AUTHORS \
+EXTRA_DIST = COPYING INSTALL README.adoc AUTHORS \
 	make_toolchain_environment.adb command_line.adb \
 	command_line.ads quasi_copying.adb quasi_copying.ads \
 	notification.adb notification.ads regular_expressions.adb \
@@ -1067,6 +1067,11 @@ install-data-hook:
 
 uninstall-hook:
 	(cd $(DESTDIR)/$(man1dir) && rm -f mte.1)
+
+# The following rule is for the maintainer.
+update-README: $(PROGNAME).1
+	pandoc $(PROGNAME).1 -o ${srcdir}/README.adoc
+.PHONY: update-README
 
 # local variables:
 # coding: utf-8

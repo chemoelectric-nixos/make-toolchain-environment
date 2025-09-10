@@ -1,7 +1,7 @@
 == NAME
 
 make-toolchain-environment - manual page for make-toolchain-environment
-2.0.0
+2.0.1
 
 == SYNOPSIS
 
