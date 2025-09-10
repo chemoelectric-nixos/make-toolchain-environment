@@ -24,6 +24,7 @@ with gnat.command_line;
 with gnat.strings;
 
 with dist_version;
+with default_regular_expression;
 
 package body command_line is
 
@@ -31,6 +32,8 @@ package body command_line is
   use ada.strings.unbounded;
   use ada.text_io;
   use gnat.command_line;
+
+  use default_regular_expression;
 
   subtype argument is ada.strings.unbounded.unbounded_string;
   package argument_vectors is new

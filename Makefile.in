@@ -128,7 +128,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = dist_version.ads gnat.adc
+CONFIG_CLEAN_FILES = default_regular_expression.ads dist_version.ads \
+	gnat.adc
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(man1dir)"
@@ -236,6 +237,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 AM_RECURSIVE_TARGETS = cscope
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
+	$(srcdir)/default_regular_expression.ads.in \
 	$(srcdir)/dist_version.ads.in $(srcdir)/gnat.adc.in \
 	$(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
@@ -284,6 +286,7 @@ CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
+DEFAULT_REGEXP = @DEFAULT_REGEXP@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -477,6 +480,8 @@ $(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+default_regular_expression.ads: $(top_builddir)/config.status $(srcdir)/default_regular_expression.ads.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 dist_version.ads: $(top_builddir)/config.status $(srcdir)/dist_version.ads.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 gnat.adc: $(top_builddir)/config.status $(srcdir)/gnat.adc.in
@@ -1038,6 +1043,7 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					notification.adb notification.ads \
 					regular_expressions.adb \
 					regular_expressions.ads \
+					default_regular_expression.ads \
 					dist_version.ads \
 					EIO_value.$(OBJEXT) \
 					regexp_pcre2.$(OBJEXT)

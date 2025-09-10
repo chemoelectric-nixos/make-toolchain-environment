@@ -54,10 +54,12 @@ if test -z "${HELP2MAN}"; then
 fi
 
 AC_ARG_VAR([GNATMAKE],[GNU gnatmake command])
+AC_ARG_VAR([GNATMAKEFLAGS],[GNU gnatmake flags [no default]])
 
-AC_ARG_VAR([GNATMAKEFLAGS],[GNU gnatmake flags [default: -g -O2]])
-if test "${ac_cv_env_GNATMAKEFLAGS_set}" != set; then
-   GNATMAKEFLAGS="-g -O2"
+AC_ARG_VAR([DEFAULT_REGEXP],
+           [default PCRE2 regular expression for shared libraries])
+if test "${ac_cv_env_DEFAULT_REGEXP_set}" != set; then
+   DEFAULT_REGEXP='(?<!/bfd-plugins)/lib@<:@^/@:>@+\.so(\.@<:@0-9@:>@+){0,3}$'
 fi
 
 AC_ARG_VAR([ASSERTION_POLICY],
@@ -85,6 +87,7 @@ AC_SUBST([PROGNAME],[make-toolchain-environment])
 
 StM_REQUIRE_GNU_MAKE_IN_PATH
 StM_CONFIG_MAKEFILES
+AC_CONFIG_FILES([default_regular_expression.ads])
 AC_CONFIG_FILES([dist_version.ads])
 AC_CONFIG_FILES([gnat.adc])
 

@@ -74,6 +74,7 @@ make-toolchain-environment$(EXEEXT): make_toolchain_environment.adb \
 					notification.adb notification.ads \
 					regular_expressions.adb \
 					regular_expressions.ads \
+					default_regular_expression.ads \
 					dist_version.ads \
 					EIO_value.$(OBJEXT) \
 					regexp_pcre2.$(OBJEXT)
