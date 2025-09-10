@@ -59,7 +59,11 @@ AC_ARG_VAR([GNATMAKEFLAGS],[GNU gnatmake flags [no default]])
 AC_ARG_VAR([DEFAULT_REGEXP],
            [default PCRE2 regular expression for shared libraries])
 if test "${ac_cv_env_DEFAULT_REGEXP_set}" != set; then
-   DEFAULT_REGEXP='(?<!/bfd-plugins)/lib@<:@^/@:>@+\.so(\.@<:@0-9@:>@+){0,3}$'
+   DEFAULT_REGEXP='^(/(?!plugins/)[[^/]]*)*/lib[[^/]]+\.so(\.[[0-9]]+){0,3}$'
+   #
+   # # If you wanted also to exclude the bfd-plugins directory from GCC.
+   # DEFAULT_REGEXP='^(/(?!(bfd-|)plugins/)[[^/]]*)*/lib[[^/]]+\.so(\.[[0-9]]+){0,3}$'
+   #
 fi
 
 AC_ARG_VAR([ASSERTION_POLICY],

@@ -15347,7 +15347,11 @@ fi
 
 
 if test "${ac_cv_env_DEFAULT_REGEXP_set}" != set; then
-   DEFAULT_REGEXP='(?<!/bfd-plugins)/lib[^/]+\.so(\.[0-9]+){0,3}$'
+   DEFAULT_REGEXP='^(/(?!plugins/)[^/]*)*/lib[^/]+\.so(\.[0-9]+){0,3}$'
+   #
+   # # If you wanted also to exclude the bfd-plugins directory from GCC.
+   # DEFAULT_REGEXP='^(/(?!(bfd-|)plugins/)[[^/]]*)*/lib[[^/]]+\.so(\.[[0-9]]+){0,3}$'
+   #
 fi
 
 
