@@ -168,6 +168,20 @@ package body command_line is
            "directories must");
       new_line;
       put ("be absolute paths.");
+      new_line (2);
+      put ("Patterns for the --regexp option must be in Unicode PCRE2 " &
+           "format.");
+      new_line;
+      put ("The default pattern, used by the --libraries option, is");
+      new_line (2);
+      put ("  '");
+      put (default_regexp);
+      put ("'");
+      new_line (2);
+      put ("ELF files whose paths satisfy the regular expression " &
+           "will be ""copied"" as");
+      new_line;
+      put ("linker scripts instead of as symlinks.");
       new_line;
     when others =>
       bail_out := true;
